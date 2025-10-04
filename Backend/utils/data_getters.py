@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 import gzip 
 import requests
 
-#Get no2 data from NASA's TEMPO 
+
+#Gets pollutant data from NASA's TEMPO and AirNow (US only)
 def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_column_troposphere", locname="pyrsig_cache"):
     """
     Fetch and process TEMPO and AirNow air quality data for a date range.
@@ -35,20 +36,11 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
         - 'airnow_df': Raw AirNow dataframe (or empty if no data)
         - 'date_range': List of dates processed
         - 'airnow_available': Boolean indicating if AirNow data was found
-    """
-    pollutants = {
-        'no2': 'tempo.l2.no2.vertical_column_troposphere',
-        'formaldehyde': 'tempo.l2.hcho.vertical_column_troposphere',
-        'ozone': 'tempo.l2.o3.vertical_column_troposphere'
-    }
-    if tempokey not in pollutants.items(): 
-        raise ValueError("Unknown pollutant or metric passed into function.")
-
-    # If no end date, just use start date
+    """  
     if edate is None:
         edate = bdate
     
-    # Generate list of dates
+    # Generate date list
     start = datetime.strptime(bdate, "%Y-%m-%d")
     end = datetime.strptime(edate, "%Y-%m-%d")
     date_list = []
@@ -57,91 +49,71 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
         date_list.append(current.strftime("%Y-%m-%d"))
         current += timedelta(days=1)
     
-    # Initialize lists to store data from each day
-    tempo_dfs = []
-    airnow_dfs = []
-    airnow_available = False
+    # TEMPO pollutants to fetch
+    tempo_products = {
+        'no2': 'tempo.l2.no2.vertical_column_troposphere',
+        'formaldehyde': 'tempo.l2.hcho.vertical_column_troposphere',
+        'ozone': 'tempo.l2.o3.vertical_column_troposphere'
+    }
     
-    # Loop through each date
+    # Store data for each pollutant
+    all_data = {pollutant: [] for pollutant in tempo_products.keys()}
+    airnow_data = {'pm25': [], 'ozone': [], 'no2': []}
+    
+    # Loop through dates
     for date in date_list:
-        print(f"Fetching data for {date}...")
+        print(f"\nFetching data for {date}...")
         
-        try:
-            # Initialize API for this date
-            api = pyrsig.RsigApi(bdate=date, bbox=bbox, workdir=locname, gridfit=True)
-            api_key = "anonymous"
-            api.tempo_kw["api_key"] = api_key
-            
-            # Fetch TEMPO data
+        api = pyrsig.RsigApi(bdate=date, bbox=bbox, workdir=locname, gridfit=True)
+        api.tempo_kw["api_key"] = "anonymous"
+        
+        # Get TEMPO satellite data
+        for pollutant, key in tempo_products.items():
             try:
-                tempo_df = api.to_dataframe(tempokey, unit_keys=False, parse_dates=True, backend="xdr")
-                if not tempo_df.empty:
-                    tempo_dfs.append(tempo_df)
-                    print(f"TEMPO data: {len(tempo_df)} records")
-                else:
-                    print(f"TEMPO data: No records found")
+                df = api.to_dataframe(key, unit_keys=False, parse_dates=True, backend="xdr")
+                if not df.empty:
+                    all_data[pollutant].append(df)
+                    print(f"TEMPO {pollutant}: {len(df)} records")
             except Exception as e:
-                print(f"TEMPO data failed: {e}")
-            
-            # Fetch AirNow data with error handling
+                print(f"Missing TEMPO {pollutant}: {e}")
+        
+        # Get AirNow ground data
+        airnow_products = {
+            'pm25': 'airnow.pm25',
+            'ozone': 'airnow.ozone',
+            'no2': 'airnow.no2'
+        }
+        
+        for pollutant, key in airnow_products.items():
             try:
-                airnowkey = "airnow.no2"
-                airnow_df = api.to_dataframe(airnowkey, unit_keys=False, parse_dates=True)
-                if not airnow_df.empty:
-                    airnow_dfs.append(airnow_df)
-                    airnow_available = True
-                    print(f"AirNow data: {len(airnow_df)} records")
-                else:
-                    print(f"AirNow data: No records found")
-            except (gzip.BadGzipFile, pd.errors.EmptyDataError, FileNotFoundError) as e:
-                print(f"AirNow data not available (no monitoring stations in area or corrupted data)")
+                df = api.to_dataframe(key, unit_keys=False, parse_dates=True)
+                if not df.empty:
+                    airnow_data[pollutant].append(df)
+                    print(f"AirNow {pollutant}: {len(df)} records")
             except Exception as e:
-                print(f"AirNow data failed: {e}")
-            
-        except Exception as e:
-            print(f"API error for {date}: {e}")
-            continue
+                print(f"Missing AirNow {pollutant}: Not available")
     
-    # Combine all dataframes
-    tempo_df_combined = pd.concat(tempo_dfs, ignore_index=True) if tempo_dfs else pd.DataFrame()
-    airnow_df_combined = pd.concat(airnow_dfs, ignore_index=True) if airnow_dfs else pd.DataFrame()
+    # Combine data for each pollutant
+    combined_data = {}
     
-    # Sort by time
-    if not tempo_df_combined.empty:
-        tempo_df_combined = tempo_df_combined.sort_values('time')
-    if not airnow_df_combined.empty:
-        airnow_df_combined = airnow_df_combined.sort_values('time')
+    for pollutant in tempo_products.keys():
+        if all_data[pollutant]:
+            combined_data[f'tempo_{pollutant}'] = pd.concat(all_data[pollutant], ignore_index=True)
+            combined_data[f'tempo_{pollutant}'] = combined_data[f'tempo_{pollutant}'].sort_values('time')
     
-    # Calculate hourly averages on combined data
-    tempo_hourly = pd.DataFrame()
-    tempo_no2_hourly = pd.Series(dtype=float)
-    airnow_no2_hourly = pd.Series(dtype=float)
-    
-    if not tempo_df_combined.empty:
-        tempo_hourly = tempo_df_combined.groupby(pd.Grouper(key="time", freq="1h")).mean(numeric_only=True)
-        tempo_no2_hourly = tempo_df_combined.groupby(pd.Grouper(key="time", freq="1h"))["no2_vertical_column_troposphere"].mean()
-    
-    if not airnow_df_combined.empty:
-        airnow_no2_hourly = airnow_df_combined.groupby(pd.Grouper(key="time", freq="1h"))["no2"].median()
+    for pollutant in airnow_products.keys():
+        if airnow_data[pollutant]:
+            combined_data[f'airnow_{pollutant}'] = pd.concat(airnow_data[pollutant], ignore_index=True)
+            combined_data[f'airnow_{pollutant}'] = combined_data[f'airnow_{pollutant}'].sort_values('time')
     
     # Summary
-    print(f"\n{'='*50}")
-    print(f"Summary:")
-    print(f"  Dates processed: {len(date_list)}")
-    print(f"  TEMPO records: {len(tempo_df_combined)}")
-    print(f"  AirNow records: {len(airnow_df_combined)}")
-    print(f"  AirNow available: {airnow_available}")
-    print(f"{'='*50}\n")
+    print(f"\n{'='*60}")
+    print("Data Summary:")
+    for key, df in combined_data.items():
+        print(f"  {key}: {len(df)} records")
+    print(f"{'='*60}\n")
     
-    return {
-        'tempo_hourly': tempo_hourly,
-        'tempo_no2_hourly': tempo_no2_hourly,
-        'airnow_no2_hourly': airnow_no2_hourly,
-        'tempo_df': tempo_df_combined,
-        'airnow_df': airnow_df_combined,
-        'date_range': date_list,
-        'airnow_available': airnow_available
-    }
+    return combined_data
 
 
 
