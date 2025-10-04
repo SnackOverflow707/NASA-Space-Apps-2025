@@ -1,0 +1,4 @@
+*.txt 
+*.nc 
+../.DS_store
+*.zip
