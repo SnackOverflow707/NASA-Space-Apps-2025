@@ -61,7 +61,7 @@ export default function TabTwoScreen() {
         {/* Susceptible circle indicator */}
           {susceptible && (
           <ThemedView style={styles.susceptibleCircle}>
-          <ThemedText style={styles.susceptibleText}>S</ThemedText>
+          <ThemedText style={styles.susceptibleText}>susceptible</ThemedText>
           </ThemedView>
         )}    
       </ThemedView>
@@ -251,10 +251,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   susceptibleCircle: {
-    width: 25,
+    width: 80,
     height: 25,
     borderRadius: 12.5,
-    backgroundColor: 'red',
+    backgroundColor: '#FF4747',
     position: 'absolute',
     bottom: 10,
     right: 10,
@@ -265,6 +265,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
+    textAlign: 'center'
   },
 });
 
