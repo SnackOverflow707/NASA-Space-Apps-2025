@@ -1,7 +1,5 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, TouchableOpacity, Text, View } from 'react-native';
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
+import { Modal, Platform, StyleSheet, TouchableOpacity, Text, View, SwitchProps } from 'react-native';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -20,6 +18,14 @@ type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
 export default function TabTwoScreen() {
   // --- State for the Tamagotchi image ---
   const [currentImage, setCurrentImage] = useState(happyImg);
+
+  // --- State for the pop-up window ---
+  const [modalVisible, setModalVisible] = useState(false);
+
+  //Variable for if user is susceptible to pollution
+
+  const [susceptible, setSusceptible] = useState(false);
+
 
   // --- Function to switch images ---
   const showImage = (imageName: ImageName) => {
@@ -48,9 +54,16 @@ export default function TabTwoScreen() {
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
         <Image source={currentImage} style={styles.image} />
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity style={styles.editButton}
+         onPress={() =>{console.log('Edit button pressed'); setModalVisible(true)}}>
           <Ionicons name="information-circle-outline" size={28} color="black" />
         </TouchableOpacity>
+        {/* Susceptible circle indicator */}
+          {susceptible && (
+          <ThemedView style={styles.susceptibleCircle}>
+          <ThemedText style={styles.susceptibleText}>S</ThemedText>
+          </ThemedView>
+        )}    
       </ThemedView>
 
       {/* Buttons to switch images */}
@@ -65,7 +78,7 @@ export default function TabTwoScreen() {
           </TouchableOpacity>
         ))}
       </ThemedView>
-
+      
       {/* Data buttons */}
       <TouchableOpacity style={styles.dataButton}>
         <ThemedText style={styles.dataText}>Data 1 (navigate)</ThemedText>
@@ -76,8 +89,59 @@ export default function TabTwoScreen() {
       <TouchableOpacity style={styles.dataButton}>
         <ThemedText style={styles.dataText}>Data 3 (navigate)</ThemedText>
       </TouchableOpacity>
+      
+      {/* Modal for more information */}
+{/* Modal popup */}
+<Modal
+  transparent={true}
+  visible={modalVisible}
+  animationType="fade"
+  onRequestClose={() => setModalVisible(false)}
+>
+  <ThemedView style={styles.modalBackground}>
+    <ThemedView style={styles.modalContainer}>
+    <ThemedText style={styles.modalQuestion}>
+  Are you susceptible to airborne pollutants?
+</ThemedText>
+
+<ThemedText style={styles.modalSubText}>
+  Susceptible populations include children under 5, adults over 60 and 
+  individuals with obesity, diabetes, hypertension, pulmonary disease, 
+  or atherosclerotic cardiovascular disease.
+</ThemedText>
+
+      {/* Two buttons row */}
+      <ThemedView style={styles.buttonRow}>
+        <TouchableOpacity
+          style={styles.modalButton}
+          onPress={() => {
+            console.log('Button 1 pressed');
+            setSusceptible(true);
+            setModalVisible(false);
+          }}
+        >
+          <ThemedText style={{ color: 'white' }}>Yes</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.modalButton}
+          onPress={() => {
+            console.log('Button 2 pressed');
+            setSusceptible(false);
+            setModalVisible(false);
+          }}
+        >
+          <ThemedText style={{ color: 'white' }}>No</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    </ThemedView>
+  </ThemedView>
+</Modal>
+      
       {/* --- Your mockup ends here --- */}
     </ParallaxScrollView>
+
+        
   );
 }
 
@@ -140,6 +204,67 @@ const styles = StyleSheet.create({
   dataText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: 280,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: { marginBottom: 20, textAlign: 'center', fontSize: 16 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  closeButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 10,
+  },
+  modalButton: {
+    flex: 1,
+    backgroundColor: '#2196F3',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalQuestion: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalSubText: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+  },
+  susceptibleCircle: {
+    width: 25,
+    height: 25,
+    borderRadius: 12.5,
+    backgroundColor: 'red',
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    borderWidth: 2,
+    borderColor: 'white', // makes it stand out
+  },
+  susceptibleText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 
