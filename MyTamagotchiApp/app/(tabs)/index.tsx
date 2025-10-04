@@ -11,7 +11,11 @@ import happyImg from '../../assets/images/tamagachi-guys/happy.png';
 import sadImg from '../../assets/images/tamagachi-guys/sad.png';
 import lpaImg from '../../assets/images/tamagachi-guys/lpa.png';
 import reImg from '../../assets/images/tamagachi-guys/re.png';
-import maskImg from '../../assets/images/tamagachi-guys/mask.png';
+import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
+import button0icon from '../../assets/images/mask-icon.png';
+import button1icon from '../../assets/images/limit-outdoor.png';
+import button2icon from '../../assets/images/reduce-exposure.png';
+import button3icon from '../../assets/images/white-coach.png';
 
 type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
 
@@ -38,6 +42,10 @@ export default function TabTwoScreen() {
     };
     setCurrentImage(map[imageName]);
   };
+
+  // --- Button icons and actions ---
+  const buttonIcons = [button0icon, button1icon, button2icon, button3icon];
+  const ButtonNames: ImageName[] = ['happy', 'sad', 'lpa', 're', 'mask'];
 
   return (
     <ParallaxScrollView
@@ -68,13 +76,15 @@ export default function TabTwoScreen() {
 
       {/* Buttons to switch images */}
       <ThemedView style={styles.circleRow}>
-        {(['happy', 'sad', 'lpa', 're', 'mask'] as ImageName[]).map((name) => (
+       {buttonIcons.map((icon, index) => (
           <TouchableOpacity
-            key={name}
+            key={index}
             style={styles.circleButton}
-            onPress={() => showImage(name)}
+            onPress={() => showImage(ButtonNames[index])}
           >
-            <ThemedText>{name}</ThemedText>
+            <Image 
+            source={icon} 
+            style={{ width: 30, height: 30, resizeMode: 'contain' }} />
           </TouchableOpacity>
         ))}
       </ThemedView>
