@@ -7,10 +7,10 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import happyImg from '../../assets/images/tamagachi-guys/happy.png';
+import happyImg from '../../assets/images/tamagachi-guys/regular.png';
 import sadImg from '../../assets/images/tamagachi-guys/sad.png';
-import lpaImg from '../../assets/images/tamagachi-guys/lpa.png';
-import reImg from '../../assets/images/tamagachi-guys/re.png';
+import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
+import reImg from '../../assets/images/tamagachi-guys/house.png';
 import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
 import button0icon from '../../assets/images/mask-icon.png';
 import button1icon from '../../assets/images/limit-outdoor.png';
@@ -45,19 +45,12 @@ export default function TabTwoScreen() {
 
   // --- Button icons and actions ---
   const buttonIcons = [button0icon, button1icon, button2icon, button3icon];
-  const ButtonNames: ImageName[] = ['happy', 'sad', 'lpa', 're', 'mask'];
+  const ButtonNames: ImageName[] = ['mask', 'lpa', 're', 'sad'];
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
+      headerHeight={10}
     >
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
