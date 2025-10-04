@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import Link from 'expo-router/link';
 import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
