@@ -24,6 +24,8 @@ import aqiverypoor from '../../assets/images/widgets/verypoor.jpg';
 import aqihazardous from '../../assets/images/widgets/hazardous.jpg';
 import { useUserCoordinates } from '../../components/get_usr_loc'; 
 import { ImageBackground } from 'react-native';
+import { getProtectionFlags, getImageProtection, getImageSpeech } from "./bird_functions";
+import { sendCoordsToBackend, getAqiBackgroundImage } from "./data_functions"
 
 type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
 
@@ -35,7 +37,6 @@ export default function TabTwoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
 
   //Variable for if user is susceptible to pollution
-
   const [susceptible, setSusceptible] = useState(false);
 
   const coords = useUserCoordinates(); 
@@ -44,120 +45,51 @@ export default function TabTwoScreen() {
   const [error, setError] = useState<string | null>(null);
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
 
-  // --- Function to figure out which methods work--
-const getProtectionFlags = (aqi, susceptible = false) => {
-  if (aqi >= 301) {
-    return { mask: true, reducedActivity: false, stayIndoors: true };
-  } else if (aqi >= 201) {
-    return susceptible
-      ? { mask: true, reducedActivity: false, stayIndoors: true }
-      : { mask: true, reducedActivity: true, stayIndoors: false };
-  } else if (aqi >= 151) {
-    return { mask: true, reducedActivity: true, stayIndoors: false };
-  } else if (aqi >= 101) {
-    return { mask: susceptible, reducedActivity: susceptible, stayIndoors: false };
-  } else if (aqi >= 51) {
-    return { mask: false, reducedActivity: susceptible, stayIndoors: false };
-  } else if (aqi >= 0) {
-    return { mask: false, reducedActivity: false, stayIndoors: false };
-  } else {
-    return { mask: false, reducedActivity: false, stayIndoors: false };
-  }
-};
-
-// --- Returns protection level of an image ---
-const getImageProtection = (imageName, susceptible = false) => {
-  switch(imageName) {
-    case "mask":
-      return { mask: true, reducedActivity: false, stayIndoors: false };
-    case "lpa": // e.g., "limited physical activity"
-      return        { mask: false, reducedActivity: true, stayIndoors: false };
-    case "re": // e.g., "resting / indoors"
-      return { mask: false, reducedActivity: false, stayIndoors: true };
-    case "happy": // normal state
-    case "sad":
-    default:
-      return { mask: false, reducedActivity: false, stayIndoors: false };
-  }
-};
-
-// --- Generate speech bubble text based on image, AQI, and susceptibility ---
-const getImageSpeech = (imageName, aqi, susceptible = false) => {
-  if (aqi === null) return "Loading AQI...";
-
-  const imageFlags = getImageProtection(imageName, susceptible);
-
-  // Recommended protection based on AQI
-  const aqiFlags = getProtectionFlags(aqi, susceptible);
-
-  const parts = [];
-
-  if (aqiFlags.mask && !imageFlags.mask) parts.push("😷 You should wear a mask");
-  if (aqiFlags.reducedActivity && !imageFlags.reducedActivity) parts.push("🏃‍♂️ Reduce activity more");
-  if (aqiFlags.stayIndoors && !imageFlags.stayIndoors) parts.push("🏠 Consider staying indoors");
-
-  if (parts.length === 0) return "👍 Current protection is sufficient";
-
-  return parts.join(" | ");
-};
-
-  // --- Function to send coordinates to backend ---
-  const sendCoordsToBackend = async () => {
-    console.log("Current coords:", coords);
-
-    if (!coords) {
-      console.log("Coords not available yet.");
-      return;
-    }
-
-    try {
-      console.log("Sending request to backend...");
-
-      //Changed port from 8081 to 5000
-      const response = await fetch('http://localhost:5001/get_data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        }),
-      });
-
-      console.log("Response received:", response);
-
-      //Check if response is ok before parsing JSON
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Data received from backend:", data);
-
-      if (data.aqi !== undefined) {
-        console.log("Setting AQI:", data.aqi);
-        setAqi(data.aqi);
-        setError(null);
-        
-        // Also set the rating if available
-        if (data.rating) {
-          setAqiRating(data.rating);
-        }
-      } else {
-        console.log("AQI not found in response:", data);
-        setError("AQI data not available");
-      }
-    } catch (error) {
-      console.error('Failed to send coordinates:', error);
-      setError('Failed to fetch AQI data');
-    }
-  };
-
+  // Fetch backend data when coordinates change
   useEffect(() => {
-    if (coords?.latitude && coords?.longitude) {
-      sendCoordsToBackend();
-    }
-  }, [coords?.latitude, coords?.longitude]); // Only re-run when lat/lon actually changes
+    const fetchData = async () => {
+      if (coords?.latitude && coords?.longitude) {
+        try {
+          const data = await sendCoordsToBackend(coords);
+          // Assuming sendCoordsToBackend returns the response data
+          if (data.aqi !== undefined) {
+            setAqi(data.aqi);
+            setError(null);
+            
+            if (data.rating) {
+              setAqiRating(data.rating);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch data:', err);
+          setError('Failed to fetch AQI data');
+        }
+      }
+    };
 
+    fetchData();
+  }, [coords?.latitude, coords?.longitude]);
+
+    // Update speech text when AQI or susceptibility changes
+  useEffect(() => {
+    if (aqi !== null) {
+      // Update speech for current image based on new AQI
+      const currentImageName = getCurrentImageName();
+      setSpeechText(getImageSpeech(currentImageName, aqi, susceptible));
+    }
+  }, [aqi, susceptible]);
+
+    // Helper function to get current image name
+  const getCurrentImageName = (): ImageName => {
+    const imageMap: Record<string, ImageName> = {
+      [happyImg]: 'happy',
+      [sadImg]: 'sad',
+      [lpaImg]: 'lpa',
+      [reImg]: 're',
+      [maskImg]: 'mask',
+    };
+    return imageMap[currentImage] || 'happy';
+  };
 
   // --- Function to switch images ---
   const showImage = (imageName: ImageName) => {
@@ -170,18 +102,6 @@ const getImageSpeech = (imageName, aqi, susceptible = false) => {
     };
     setCurrentImage(map[imageName]);
     setSpeechText(getImageSpeech(imageName, aqi, susceptible));
-  };
-
-  //function to select aqi widget background 
-  const getAqiBackgroundImage = (aqiValue: number | null) => {
-    if (aqiValue === null) return null;
-    
-    if (aqiValue <= 33) return aqiverygood;           // Good
-    if (aqiValue <= 67) return aqigood;      // Moderate
-    if (aqiValue <= 100) return aqifair;     // Unhealthy for Sensitive Groups
-    if (aqiValue <= 150) return aqipoor; // Unhealthy
-    if (aqiValue <= 200) return aqiverypoor;
-    return aqihazardous;                           // Very Unhealthy/Hazardous
   };
 
   // --- Button icons and actions ---
@@ -234,7 +154,7 @@ const getImageSpeech = (imageName, aqi, susceptible = false) => {
   {/* --- Square with Buttons beside it --- */}
 <ThemedView style={styles.squareRow}>
   <ImageBackground
-    source={getAqiBackgroundImage(aqi)!}
+    source={getAqiBackgroundImage(aqi, aqiverygood, aqigood, aqifair, aqipoor, aqiverypoor, aqihazardous)!}
     style={styles.squareBackgroundImage} // container dimensions
     imageStyle={{ borderRadius: 20 }} // round corners of the image
   >
