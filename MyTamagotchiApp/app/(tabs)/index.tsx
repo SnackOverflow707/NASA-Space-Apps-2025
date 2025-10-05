@@ -42,6 +42,64 @@ export default function TabTwoScreen() {
   const [aqi, setAqi] = useState<number | null>(null);
   const [aqiRating, setAqiRating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
+
+  // --- Function to figure out which methods work--
+const getProtectionFlags = (aqi, susceptible = false) => {
+  if (aqi >= 301) {
+    return { mask: true, reducedActivity: false, stayIndoors: true };
+  } else if (aqi >= 201) {
+    return susceptible
+      ? { mask: true, reducedActivity: false, stayIndoors: true }
+      : { mask: true, reducedActivity: true, stayIndoors: false };
+  } else if (aqi >= 151) {
+    return { mask: true, reducedActivity: true, stayIndoors: false };
+  } else if (aqi >= 101) {
+    return { mask: susceptible, reducedActivity: susceptible, stayIndoors: false };
+  } else if (aqi >= 51) {
+    return { mask: false, reducedActivity: susceptible, stayIndoors: false };
+  } else if (aqi >= 0) {
+    return { mask: false, reducedActivity: false, stayIndoors: false };
+  } else {
+    return { mask: false, reducedActivity: false, stayIndoors: false };
+  }
+};
+
+// --- Returns protection level of an image ---
+const getImageProtection = (imageName, susceptible = false) => {
+  switch(imageName) {
+    case "mask":
+      return { mask: true, reducedActivity: false, stayIndoors: false };
+    case "lpa": // e.g., "limited physical activity"
+      return        { mask: false, reducedActivity: true, stayIndoors: false };
+    case "re": // e.g., "resting / indoors"
+      return { mask: false, reducedActivity: false, stayIndoors: true };
+    case "happy": // normal state
+    case "sad":
+    default:
+      return { mask: false, reducedActivity: false, stayIndoors: false };
+  }
+};
+
+// --- Generate speech bubble text based on image, AQI, and susceptibility ---
+const getImageSpeech = (imageName, aqi, susceptible = false) => {
+  if (aqi === null) return "Loading AQI...";
+
+  const imageFlags = getImageProtection(imageName, susceptible);
+
+  // Recommended protection based on AQI
+  const aqiFlags = getProtectionFlags(aqi, susceptible);
+
+  const parts = [];
+
+  if (aqiFlags.mask && !imageFlags.mask) parts.push("😷 You should wear a mask");
+  if (aqiFlags.reducedActivity && !imageFlags.reducedActivity) parts.push("🏃‍♂️ Reduce activity more");
+  if (aqiFlags.stayIndoors && !imageFlags.stayIndoors) parts.push("🏠 Consider staying indoors");
+
+  if (parts.length === 0) return "👍 Current protection is sufficient";
+
+  return parts.join(" | ");
+};
 
   // --- Function to send coordinates to backend ---
   const sendCoordsToBackend = async () => {
@@ -111,6 +169,7 @@ export default function TabTwoScreen() {
       mask: maskImg,
     };
     setCurrentImage(map[imageName]);
+    setSpeechText(getImageSpeech(imageName, aqi, susceptible));
   };
 
   //function to select aqi widget background 
@@ -137,6 +196,13 @@ export default function TabTwoScreen() {
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
         <Image source={currentImage} style={styles.image} />
+        {/* --- Speech Bubble --- */}
+        {speechText && (
+          <ThemedView style={styles.speechBubble}>
+            <ThemedText style={styles.speechText}>{speechText}</ThemedText>
+            <ThemedView style={styles.speechArrow} />
+          </ThemedView>
+         )}
         <TouchableOpacity style={styles.editButton}
          onPress={() =>{console.log('Edit button pressed'); setModalVisible(true)}}>
           <Ionicons name="information-circle-outline" size={28} color="black" />
@@ -489,6 +555,49 @@ squareText: {
     fontWeight: '600',
     color: '#333',
   },
+
+
+  //Speech bubble style
+  speechBubble: {
+    position: 'absolute',
+    top: '5%',       // vertically aligned with the bird
+    left: '55%',      // push to the right side inside the imageBox
+    width: 120,
+    backgroundColor: 'white',
+    padding: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  
+  speechText: {
+    fontSize: 12,
+    color: '#333',
+    textAlign: 'center',
+  },
+  
+  speechArrow: {
+    position: 'absolute',
+    bottom: -6,
+    left: 10,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 6,
+    borderBottomWidth:0,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: 'white',
+    borderBottomColor: 'transparent',
+    backgroundColor: 'transparent',
+  }
   
 });
 
