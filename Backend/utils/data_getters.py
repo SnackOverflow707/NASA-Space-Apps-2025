@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timedelta
 import gzip 
 import requests
+import numpy as np 
 
 
 #Gets pollutant data from NASA's TEMPO and AirNow (US only)
@@ -116,78 +117,6 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
     return combined_data
 
 
-
-#Get weather data from NASA's merra2 (LAG: Data is only available 2-3 weeks after)
-def get_merra2_weather(bbox, date):
-    """
-    Get MERRA-2 reanalysis weather data from NASA
-    Includes boundary layer height!
-    
-    Parameters:
-    -----------
-    bbox : tuple
-        (min_lon, min_lat, max_lon, max_lat)
-    date : str
-        Date in "YYYY-MM-DD" format
-    """
-    # Authenticate
-    earthaccess.login()
-    
-    # Search for MERRA-2 data
-    # M2T1NXSLV: Single-Level Diagnostics (temp, wind, pressure, etc.)
-    results = earthaccess.search_data(
-        short_name='M2T1NXSLV',
-        temporal=(date, date),
-        bounding_box=bbox
-    )
-    
-    print(f"Found {len(results)} granules")
-    
-    if len(results) == 0:
-        print("No data found.")
-        return None
-    
-    # Open files with explicit engine
-    print("Opening files...")
-    try:
-        files = earthaccess.open(results)
-        # Try netcdf4 engine explicitly
-        try:
-            ds = xr.open_mfdataset(files, engine='netcdf4', combine='by_coords')
-            #print("✓ Opened with netcdf4 engine")
-        except:
-            # Fallback to h5netcdf
-            ds = xr.open_mfdataset(files, engine='h5netcdf', combine='by_coords')
-            #print("✓ Opened with h5netcdf engine")
-        
-        # Subset to bounding box
-        ds_subset = ds.sel(
-            lon=slice(bbox[0], bbox[2]),
-            lat=slice(bbox[1], bbox[3])
-        )
-        
-        # Extract variables
-        weather_data = {
-            'time': ds_subset['time'].values,
-            'lat': ds_subset['lat'].values,
-            'lon': ds_subset['lon'].values,
-            'temp_2m': ds_subset['T2M'].values,
-            'wind_u_10m': ds_subset['U10M'].values,
-            'wind_v_10m': ds_subset['V10M'].values,
-            'humidity': ds_subset['QV2M'].values,
-            'pressure': ds_subset['PS'].values,
-            'precip_total': ds_subset['PRECTOT'].values,
-            'pbl_height': ds_subset['PBLH'].values
-        }
-        
-        print(f"Successfully loaded MERRA-2 data")     
-        return weather_data
-    
-    except Exception as e:
-        print(f"Error opening files: {e}")
-        return None
-
-
 def get_openmeteo_weather(bbox, forecast_hours=48):
     """
     Get weather data from Open-Meteo (FREE, no API key!)
@@ -283,4 +212,97 @@ def get_openmeteo_weather(bbox, forecast_hours=48):
         'current': current,
         'forecast': forecast
     }
+
+
+def get_aqi(bbox, start_date, end_date=None, hour=None): 
+
+    # API endpoint
+    center_lat = (bbox[1] + bbox[3]) / 2
+    center_lon = (bbox[0] + bbox[2]) / 2
+  
+    current_date = datetime.now().date() # gets according to the local time
+
+    if end_date is None:
+        end_date = start_date  
+    
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    if hour == None: 
+        if start_date == current_date: 
+            hour = datetime.now().hour  
+
+    # Convert back to standardized YYYY-MM-DD strings
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+
+    #url = "https://api.open-meteo.com/v1/air-quality" 
+    params = {
+        'latitude': center_lat, 
+        'longitude': center_lon, 
+        'hourly': 'us_aqi', 
+        'start_date': start_date, 
+        'end_date': end_date 
+    }
+
+    url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={center_lat}&longitude={center_lon}&start_date={start_date}&end_date={end_date}&hourly=us_aqi"
+    response = requests.get(url, params)
+
+    data = response.json()
+    us_aqi = data[0]['hourly']['us_aqi']
+
+    if hour is not None: 
+        return int(us_aqi[hour]) #current aqi 
+    
+    else: 
+        accum = 0
+        for rating in us_aqi: 
+            accum += rating 
+
+        return int(accum / len(us_aqi)) #average aqi over specified range 
+
+
+def rate_aqi(aqi): 
+
+    if aqi < 0:
+        raise ValueError("Invalid negative value for AQI.")
+
+    # Define ranges
+    VERY_GOOD = np.arange(0, 34)
+    GOOD = np.arange(34, 67)
+    FAIR = np.arange(67, 100)
+    POOR = np.arange(100, 150)
+    VERY_POOR = np.arange(150, 201)
+    
+    # Map ranges to strings
+    rating_list = [
+        (VERY_GOOD, "very good"),
+        (GOOD, "good"),
+        (FAIR, "fair"),
+        (POOR, "poor"),
+        (VERY_POOR, "very poor")
+    ]
+
+    # Check which range AQI falls in
+    for rng, label in rating_list:
+        if aqi in rng:
+            return label
+    
+    # If AQI is outside all ranges
+    return "HAZARDOUS" 
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
 
