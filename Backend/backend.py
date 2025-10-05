@@ -10,7 +10,8 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.dirname(current_dir)
 sys.path.insert(0, backend_dir)
-from utils.data_getters import get_openmeteo_weather, get_aqi, get_pollutants 
+from utils.data_getters import get_openmeteo_weather, get_aqi, get_pollutants
+from utils.surprise_me import surprise_me 
 
 app = Flask(__name__)
 
@@ -56,6 +57,15 @@ def get_weather_data(bbox):
     # Renamed, removed jsonify
     current_weather = get_openmeteo_weather(bbox)
     return current_weather  #Return raw data, not jsonified
+
+@app.route("/surprise", methods=["POST", "OPTIONS"])
+def surpriseMe(): 
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    response = surprise_me()      
+    return jsonify(response), 200
+
 
 @app.route("/get_data", methods=["POST", "OPTIONS"])  
 def backend_main(): 
