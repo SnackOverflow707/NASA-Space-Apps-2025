@@ -75,8 +75,8 @@ export default function TabTwoScreen() {
   };
 
   // --- Button icons and actions ---
-  const buttonIcons = [button0icon, button1icon, button2icon, button3icon];
-  const ButtonNames: ImageName[] = ['mask', 'lpa', 're', 'sad'];
+  const buttonIcons = [button0icon, button2icon, button3icon];
+  const ButtonNames: ImageName[] = ['mask', 're', 'lpa'];
 
   return (
     <ParallaxScrollView
