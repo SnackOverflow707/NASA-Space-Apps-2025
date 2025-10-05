@@ -102,6 +102,17 @@ export default function TabTwoScreen() {
 
   // --- Function to switch images ---
   const showImage = (imageName: ImageName) => {
+    // If user asked for "happy", decide dynamically
+    if (imageName === "happy") {
+      const aqiFlags = getProtectionFlags(aqi ?? 0, susceptible);
+      const allFlagsTrue = (aqiFlags.mask === false && aqiFlags.reducedActivity === false && aqiFlags.stayIndoors === false);
+      const moodImage = allFlagsTrue ? happyImg : sadImg;
+      setCurrentImage(moodImage);
+      setSpeechText(getImageSpeech(allFlagsTrue ? "happy" : "sad", aqi, susceptible));
+      return;
+    }
+  
+    // Otherwise use static mapping
     const map: Record<ImageName, any> = {
       happy: happyImg,
       sad: sadImg,
@@ -109,9 +120,11 @@ export default function TabTwoScreen() {
       re: reImg,
       mask: maskImg,
     };
+  
     setCurrentImage(map[imageName]);
     setSpeechText(getImageSpeech(imageName, aqi, susceptible));
   };
+  
 
   // --- Button icons and actions ---
   const buttonIcons = [button0icon, button1icon, button2icon, button3icon];
