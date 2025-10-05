@@ -23,6 +23,7 @@ import aqipoor from '../../assets/images/widgets/poor.jpg';
 import aqiverypoor from '../../assets/images/widgets/verypoor.jpg';
 import aqihazardous from '../../assets/images/widgets/hazardous.jpg';
 import surpriseButton from '../../assets/images/surprise.jpg'; 
+import cloudImg from '../../assets/images/cloudicon.png';
 import { useUserCoordinates } from '../../components/get_usr_loc'; 
 import { ImageBackground } from 'react-native';
 import { getProtectionFlags, getImageProtection, getImageSpeech } from "./bird_functions";
@@ -49,7 +50,6 @@ export default function TabTwoScreen() {
   const [error, setError] = useState<string | null>(null);
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
   const [surpriseData, setSurpriseData] = useState(null);
-  const [isPressed, setIsPressed] = useState(false);
 
   // Fetch backend data when coordinates change
   useEffect(() => {
@@ -105,20 +105,16 @@ export default function TabTwoScreen() {
   };
 
 const surpriseMe = async () => {
-  
   try {
     const response = await fetch("http://localhost:5001/surprise", {
-      method: "POST",
+      method: "POST",  // Add this!
       headers: {
         "Content-Type": "application/json",
       },
     });
     const result = await response.json();
-    setIsPressed(true); // Move this AFTER the data is set!
     console.log("Surprise me button --> city ", result.city);
-    setSurpriseData(result);
-  
-    
+    setSurpriseData(result); 
   } catch (error) {
     console.error("Error fetching data:", error);
   }
@@ -228,55 +224,51 @@ return (
   </ImageBackground> */}
 
     {/* Random buttons beside the square */}
-  <ThemedView style={styles.buttonColumn}>
-    <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>
-        {weather?.current?.temp ? `Temperature: ${Math.round(weather.current.temp)}°C` : 'Temp'}
-      </ThemedText>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>
-        {weather?.current?.precipitation != null ? `Precipitation: ${Math.round(weather.current.precipitation)}mm` : 'Precipitation'}
-      </ThemedText>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>Button C</ThemedText>
-    </TouchableOpacity>
-  </ThemedView>
+    <ThemedView style={styles.buttonColumn}>
+      <TouchableOpacity style={styles.sideButton}>
+        <Image
+          source={cloudImg}
+          style={styles.backgroundIcon}
+        />
+        <ThemedText style={styles.buttonText}>
+          {weather?.current?.temp
+            ? `Temperature: ${Math.round(weather.current.temp)}°C`
+            : "Temp"}
+        </ThemedText>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.sideButton}>
+        <Image
+          source={cloudImg}
+          style={styles.backgroundIcon}
+        />
+        <ThemedText style={styles.buttonText}>
+          {weather?.current?.precipitation != null
+            ? `Precipitation: ${Math.round(weather.current.precipitation)}mm`
+            : "Precipitation"}
+        </ThemedText>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.sideButton}>
+        <Image
+          source={cloudImg}
+          style={styles.backgroundIcon}
+        />
+        <ThemedText style={styles.buttonText}>Button C</ThemedText>
+      </TouchableOpacity>
+    </ThemedView>
 
 {/*surprise me button!*/} 
-<ThemedView>
-  {!isPressed ? (
-    // Original button
-    <TouchableOpacity onPress={surpriseMe} style={styles.surpriseMe}>
-      <ImageBackground
-        source={surpriseButton}
-        style={styles.surpriseMe}
-        imageStyle={{ borderRadius: 20 }}>
-        <ThemedText>Surprise Me!</ThemedText>
-      </ImageBackground>
-    </TouchableOpacity>
-  ) : (
-    // Different button after pressed
-    <TouchableOpacity onPress={() => setIsPressed(false)} style={styles.surpriseMeBox}>
-      <ThemedText style={[styles.squareText, { fontWeight: '200', fontSize: 25, }]}>
-        {surpriseData.city ? surpriseData.city : "Oops!"}     
-        </ThemedText>
-<ThemedText style={[styles.squareText, { fontWeight: '100', fontSize: 18 }]}>
-  {surpriseData.city ? 
-    <>
-      Local time: {surpriseData.weather.time}{'\n\n'}
-      Temperature: {surpriseData.weather.temp}°C{'\n'}
-      Humidity: {surpriseData.weather.humidity}%{'\n'}
-      Precipitation: {surpriseData.weather.precipitation}mm{'\n'}
-      Cloud cover: {surpriseData.weather.cloud_cover}%
-    </>
-   : 
-   "It seems like the stars aren't aligning right now... try again later!"}     
-</ThemedText>
-    </TouchableOpacity>
-  )}
-</ThemedView>
+<ThemedView> 
+  <TouchableOpacity onPress={surpriseMe} style={styles.surpriseMe}>
+    <ImageBackground
+      source={surpriseButton}
+      style={styles.surpriseMe}
+      imageStyle={{ borderRadius: 20 }}>
+      <ThemedText style={styles.buttonText}>Surprise Me!</ThemedText>
+    </ImageBackground>
+  </TouchableOpacity>
+  </ThemedView>
 
 </ThemedView>
 
@@ -443,18 +435,6 @@ surpriseMe: {
   justifyContent: 'center', 
 },
 
-surpriseMeBox: {
-  marginTop: 20,
-  marginLeft: 60, 
-  width: 300,
-  height: 250,
-  padding: 15,
-  borderRadius: 8,
-  alignItems: 'center',
-  justifyContent: 'center', 
-  backgroundColor: '#aad2f3ff',
-}, 
-
   modalQuestion: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -536,6 +516,11 @@ surpriseMeBox: {
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
+  },
+  backgroundIcon: {
+    width: 225,
+    height: 60,
+    position: 'absolute',
   },
 
   squareRow: {
