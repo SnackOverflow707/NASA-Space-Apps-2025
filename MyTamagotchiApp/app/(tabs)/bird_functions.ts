@@ -30,11 +30,10 @@ export const getImageProtection = (imageName, susceptible = false) => {
       return        { mask: false, reducedActivity: true, stayIndoors: false, polluted: false  };
     case "re": // e.g., "resting / indoors"
       return { mask: false, reducedActivity: false, stayIndoors: true, polluted: false  };
-    case "happy": // normal state
     case "sad":
       return { mask: false, reducedActivity: false, stayIndoors: false, polluted: true  };
     default:
-      return { mask: false, reducedActivity: false, stayIndoors: false };
+      return { mask: false, reducedActivity: false, stayIndoors: false, polluted: false  };
   }
 };
 
