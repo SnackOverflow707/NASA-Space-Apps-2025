@@ -16,7 +16,8 @@ import button0icon from '../../assets/images/mask-icon.png';
 import button1icon from '../../assets/images/limit-outdoor.png';
 import button2icon from '../../assets/images/reduce-exposure.png';
 import button3icon from '../../assets/images/white-coach.png';
-import { useUserCoordinates } from '../components/get_usr_loc';
+import { useUserCoordinates } from '../../components/get_usr_loc';
+
 
 
 type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
@@ -135,10 +136,7 @@ export default function TabTwoScreen() {
       <ThemedText style={styles.buttonText}>Button C</ThemedText>
     </TouchableOpacity>
   </ThemedView>
-</ThemedView>
 
-
-      
       {/* Modal for more information */}
 {/* Modal popup */}
 <Modal
@@ -402,6 +400,5 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   
->>>>>>> c7f689263c37029b04c9a936ca9d186c63017a56
 });
 
