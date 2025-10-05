@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import gzip 
 import requests
 import numpy as np 
+import shutil 
 
 
 #Gets pollutant data from NASA's TEMPO and AirNow (US only)
@@ -58,6 +59,7 @@ def get_pollutants(bbox, bdate, edate=None, prevyrs=None, locname="pyrsig_cache"
     
     # Convert to string format
     date_list = [d.strftime("%Y-%m-%d") for d in all_dates]
+    print("Date list: ", date_list)
     
     # TEMPO pollutants to fetch
     tempo_products = {
@@ -73,7 +75,10 @@ def get_pollutants(bbox, bdate, edate=None, prevyrs=None, locname="pyrsig_cache"
     # Loop through dates
     for date in date_list:
         print(f"\nFetching data for {date}...")
-        
+        cache_dir = "pyrsig_cache"
+        if os.path.exists(cache_dir):
+            shutil.rmtree(cache_dir)
+
         api = pyrsig.RsigApi(bdate=date, bbox=bbox, workdir=locname, gridfit=True)
         api.tempo_kw["api_key"] = "anonymous"
         

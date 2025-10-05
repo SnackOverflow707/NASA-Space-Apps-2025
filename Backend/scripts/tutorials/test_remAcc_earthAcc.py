@@ -2,8 +2,8 @@ import earthaccess
 
 BBOX = 0.1
 
-lon = -122.2
 lat = 49.2
+lon = -122.2
 min_lon = lon - BBOX
 max_lon = lon + BBOX
 min_lat = lat - BBOX

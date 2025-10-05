@@ -5,7 +5,7 @@ import sys
 import os
 # Add Backend folder to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-from utils.functions import get_no2_data
+from utils.data_getters import get_no2_data
 from utils.dtypes import ValidCoords
 
 BBOX = 0.1

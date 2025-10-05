@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Modal, Platform, StyleSheet, TouchableOpacity, Text, View, SwitchProps } from 'react-native';
+import { Modal, Platform, StyleSheet, TouchableOpacity, Text, View, SwitchProps, Easing } from 'react-native';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -26,6 +26,8 @@ import { useUserCoordinates } from '../../components/get_usr_loc';
 import { ImageBackground } from 'react-native';
 import { getProtectionFlags, getImageProtection, getImageSpeech } from "./bird_functions";
 import { sendCoordsToBackend, getAqiBackgroundImage } from "./data_functions"
+import { LoadingMessage, AqiCardPopup, ImageWithLoadingBackground } from "./widget_functions"
+
 
 type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
 
@@ -130,10 +132,16 @@ export default function TabTwoScreen() {
   const buttonIcons = [button0icon, button1icon, button2icon, button3icon];
   const ButtonNames: ImageName[] = ['happy','mask', 're', 'lpa'];
 
-  return (
+
+return (
     <ParallaxScrollView
+<<<<<<< Updated upstream
       headerImage={<ThemedView style={{ height: 0, backgroundColor: 'transparent' }} />}
       headerBackgroundColor={{ light: 'transparent', dark: 'transparent' }}
+=======
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      //headerHeight={10}
+>>>>>>> Stashed changes
     >
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
@@ -174,23 +182,31 @@ export default function TabTwoScreen() {
       
   {/* Buttons stacked vertically */}
   {/* --- Square with Buttons beside it --- */}
+ 
+  
 <ThemedView style={styles.squareRow}>
+  <ImageWithLoadingBackground aqi={aqi} error={error} imageSource = {getAqiBackgroundImage(aqi, aqiverygood, aqigood, aqifair, aqipoor, aqiverypoor, aqihazardous)!}/>
+ {/*<AqiCardPopup aqi={aqi} error={error} /> */}
+ {/* 
   <ImageBackground
     source={getAqiBackgroundImage(aqi, aqiverygood, aqigood, aqifair, aqipoor, aqiverypoor, aqihazardous)!}
     style={styles.squareBackgroundImage} // container dimensions
     imageStyle={{ borderRadius: 20 }} // round corners of the image
   >
-    <ThemedView style={styles.textContainer}>
-      <ThemedText style={styles.squareText}>
-        {error ? error : aqi !== null ? `Current Air Quality Index: ${aqi}` : "Loading AQI..."}
-      </ThemedText>
-      {aqiRating && (
-        <ThemedText style={styles.squareText}>
-          Rating: {aqiRating}
-        </ThemedText>
-      )}
-    </ThemedView>
-  </ImageBackground>
+<ThemedView style={styles.textContainer}>
+  {error ? (
+    <ThemedText style={styles.squareText}>{error}</ThemedText>
+  ) : aqi !== null ? (
+    <ThemedText style={styles.squareText}>
+      Current Air Quality Index: {'\n\n'}
+      <ThemedText style={styles.aqiValue}>{aqi}</ThemedText>
+    </ThemedText>
+  ) : (
+    <LoadingMessage/>
+  )}
+</ThemedView> 
+  </ImageBackground> */}
+
     {/* Random buttons beside the square */}
   <ThemedView style={styles.buttonColumn}>
     <TouchableOpacity style={styles.sideButton}>
@@ -259,11 +275,12 @@ export default function TabTwoScreen() {
 </Modal>
       
       {/* --- Your mockup ends here --- */}
-    </ParallaxScrollView>
-
-        
-  );
+</ParallaxScrollView>
+); 
 }
+
+
+//------ styles ----------//
 
 const styles = StyleSheet.create({
   headerImage: {
@@ -409,6 +426,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
+  aqiValue: {
+    fontSize: 40,        // Larger font for AQI value
+    fontFamily: Platform.select({
+      ios: 'Avenir Next Rounded',
+      android: 'sans-serif',
+      default: 'System',
+    }),
+    fontWeight: 200,  
+  },
   
   bigImage: {
     width: '85%',
@@ -476,14 +502,8 @@ squareText: {
   bigSquare: {
     width: 200,
     height: 200,
-    //backgroundColor: '#f7cad0', // soft pastel red
-    //borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    //shadowColor: '#000',
-    //shadowOpacity: 0.1,
-    //shadowRadius: 6,
-    //hadowOffset: { width: 0, height: 3 },
   },
   
   buttonColumn: {
