@@ -8,7 +8,7 @@ import { Fonts } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import happyImg from '../../assets/images/tamagachi-guys/regular.png';
-import sadImg from '../../assets/images/tamagachi-guys/sad.png';
+import sadImg from '../../assets/images/tamagachi-guys/pollutants.png';
 import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
 import reImg from '../../assets/images/tamagachi-guys/house.png';
 import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
@@ -368,15 +368,6 @@ const styles = StyleSheet.create({
     height: 200,
   },
   
-  sideButton: {
-    width: 100,
-    height: 45,
-    backgroundColor: '#bcd4e6',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-  },
   
   buttonText: {
     fontSize: 16,
