@@ -49,6 +49,7 @@ export default function TabTwoScreen() {
   const [error, setError] = useState<string | null>(null);
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
   const [surpriseData, setSurpriseData] = useState(null);
+  const [isPressed, setIsPressed] = useState(false);
 
   // Fetch backend data when coordinates change
   useEffect(() => {
@@ -104,16 +105,20 @@ export default function TabTwoScreen() {
   };
 
 const surpriseMe = async () => {
+  
   try {
     const response = await fetch("http://localhost:5001/surprise", {
-      method: "POST",  // Add this!
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
     });
     const result = await response.json();
+    setIsPressed(true); // Move this AFTER the data is set!
     console.log("Surprise me button --> city ", result.city);
-    setSurpriseData(result); 
+    setSurpriseData(result);
+  
+    
   } catch (error) {
     console.error("Error fetching data:", error);
   }
@@ -240,16 +245,38 @@ return (
   </ThemedView>
 
 {/*surprise me button!*/} 
-<ThemedView> 
-  <TouchableOpacity onPress={surpriseMe} style={styles.surpriseMe}>
-    <ImageBackground
-      source={surpriseButton}
-      style={styles.surpriseMe}
-      imageStyle={{ borderRadius: 20 }}>
-      <ThemedText style={styles.buttonText}>Surprise Me!</ThemedText>
-    </ImageBackground>
-  </TouchableOpacity>
-  </ThemedView>
+<ThemedView>
+  {!isPressed ? (
+    // Original button
+    <TouchableOpacity onPress={surpriseMe} style={styles.surpriseMe}>
+      <ImageBackground
+        source={surpriseButton}
+        style={styles.surpriseMe}
+        imageStyle={{ borderRadius: 20 }}>
+        <ThemedText>Surprise Me!</ThemedText>
+      </ImageBackground>
+    </TouchableOpacity>
+  ) : (
+    // Different button after pressed
+    <TouchableOpacity onPress={() => setIsPressed(false)} style={styles.surpriseMeBox}>
+      <ThemedText style={[styles.squareText, { fontWeight: '200', fontSize: 25, }]}>
+        {surpriseData.city ? surpriseData.city : "Oops!"}     
+        </ThemedText>
+<ThemedText style={[styles.squareText, { fontWeight: '100', fontSize: 18 }]}>
+  {surpriseData.city ? 
+    <>
+      Local time: {surpriseData.weather.time}{'\n\n'}
+      Temperature: {surpriseData.weather.temp}°C{'\n'}
+      Humidity: {surpriseData.weather.humidity}%{'\n'}
+      Precipitation: {surpriseData.weather.precipitation}mm{'\n'}
+      Cloud cover: {surpriseData.weather.cloud_cover}%
+    </>
+   : 
+   "It seems like the stars aren't aligning right now... try again later!"}     
+</ThemedText>
+    </TouchableOpacity>
+  )}
+</ThemedView>
 
 </ThemedView>
 
@@ -415,6 +442,18 @@ surpriseMe: {
   alignItems: 'center',
   justifyContent: 'center', 
 },
+
+surpriseMeBox: {
+  marginTop: 20,
+  marginLeft: 60, 
+  width: 300,
+  height: 250,
+  padding: 15,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center', 
+  backgroundColor: '#aad2f3ff',
+}, 
 
   modalQuestion: {
     fontSize: 18,
