@@ -45,6 +45,7 @@ north_american_cities = {
 
 def surprise_me(): 
 
+    print("surprise me called!")
     MIN_LON = -130  # west
     MAX_LON = -60   # east
     MIN_LAT = 15    # south
@@ -63,7 +64,15 @@ def surprise_me():
     newCoords = ValidCoords(longitude=city_lon, latitude=city_lat)
 
     bbox = set_bbox(newCoords.lat, newCoords.lon)
-    return get_openmeteo_weather(bbox)['current']
+    print("City: ", city)
+    print("Today's temp: ", get_openmeteo_weather(bbox)['current']['temp'])
+    print("Coords: ", city_lat)
+
+    return {
+        "city": city, 
+        "weather": get_openmeteo_weather(bbox)['current'], 
+        "coords": [city_lat, city_lon]
+    } 
 
 
 
