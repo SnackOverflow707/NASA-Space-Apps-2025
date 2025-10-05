@@ -4,11 +4,32 @@ import pyrsig
 import pandas as pd
 import os
 from datetime import datetime, timedelta
-import gzip 
 import requests
 import numpy as np 
 import shutil 
+from utils.dtypes import ValidCoords
 
+BBOX = 0.01  # Moved to global scope
+
+def set_bbox(latitude, longitude): 
+    """Calculate bounding box from coordinates"""
+    # Removed jsonify returns - this is a helper function, not an endpoint
+    if latitude is None or longitude is None:
+        raise ValueError('Latitude and longitude are required')
+        
+    # Validate coordinates
+    try:
+        coords = ValidCoords(float(longitude), float(latitude))
+    except Exception as e:
+        raise ValueError(f'Invalid coordinates: {str(e)}')
+
+    min_lon = coords.lon - BBOX
+    max_lon = coords.lon + BBOX
+    min_lat = coords.lat - BBOX
+    max_lat = coords.lat + BBOX
+    bbox = (min_lon, min_lat, max_lon, max_lat)
+
+    return bbox 
 
 #Gets pollutant data from NASA's TEMPO and AirNow (US only)
 def get_pollutants(bbox, bdate, edate=None, prevyrs=None, locname="pyrsig_cache"):
