@@ -36,12 +36,19 @@ export default function TabTwoScreen() {
   const coords = useUserCoordinates(); 
   const [aqi, setAqi] = useState<number | null>(null);
 
-    // --- Function to send coordinates to backend ---
+  // --- Function to send coordinates to backend ---
   const sendCoordsToBackend = async () => {
-    if (!coords) return;
+    console.log("Current coords:", coords); // <-- log coords first
+
+    if (!coords) {
+      console.log("Coords not available yet."); // <-- log if null
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:5000/aqi', {
+      console.log("Sending request to backend...");
+
+      const response = await fetch('http://localhost:8081/aqi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -50,16 +57,27 @@ export default function TabTwoScreen() {
         }),
       });
 
+      console.log("Response received:", response);
+
       const data = await response.json();
-      console.log('Backend response:', data);
+      console.log("Data received from backend:", data);
 
       if (data.AQI !== undefined) {
+        console.log("Setting AQI:", data.AQI);
         setAqi(data.AQI); // <-- save AQI in state
+      } else {
+        console.log("AQI not found in response:", data);
       }
     } catch (error) {
       console.error('Failed to send coordinates:', error);
     }
   };
+
+
+  useEffect(() => {
+    sendCoordsToBackend();
+  }, [coords]);
+
 
 
   // --- Function to switch images ---
