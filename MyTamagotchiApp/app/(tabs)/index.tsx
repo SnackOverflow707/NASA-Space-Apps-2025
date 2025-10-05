@@ -35,20 +35,23 @@ export default function TabTwoScreen() {
 
   const coords = useUserCoordinates(); 
   const [aqi, setAqi] = useState<number | null>(null);
+  const [aqiRating, setAqiRating] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // --- Function to send coordinates to backend ---
   const sendCoordsToBackend = async () => {
-    console.log("Current coords:", coords); // <-- log coords first
+    console.log("Current coords:", coords);
 
     if (!coords) {
-      console.log("Coords not available yet."); // <-- log if null
+      console.log("Coords not available yet.");
       return;
     }
 
     try {
       console.log("Sending request to backend...");
 
-      const response = await fetch('http://localhost:8081/aqi', {
+      //Changed port from 8081 to 5000
+      const response = await fetch('http://localhost:5001/aqi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,24 +62,38 @@ export default function TabTwoScreen() {
 
       console.log("Response received:", response);
 
+      //Check if response is ok before parsing JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       console.log("Data received from backend:", data);
 
-      if (data.AQI !== undefined) {
-        console.log("Setting AQI:", data.AQI);
-        setAqi(data.AQI); // <-- save AQI in state
+      if (data.aqi !== undefined) {
+        console.log("Setting AQI:", data.aqi);
+        setAqi(data.aqi);
+        setError(null);
+        
+        // Also set the rating if available
+        if (data.rating) {
+          setAqiRating(data.rating);
+        }
       } else {
         console.log("AQI not found in response:", data);
+        setError("AQI data not available");
       }
     } catch (error) {
       console.error('Failed to send coordinates:', error);
+      setError('Failed to fetch AQI data');
     }
   };
 
-
   useEffect(() => {
-    sendCoordsToBackend();
-  }, [coords]);
+    if (coords?.latitude && coords?.longitude) {
+      sendCoordsToBackend();
+    }
+  }, [coords?.latitude, coords?.longitude]); // Only re-run when lat/lon actually changes
 
 
 
@@ -137,8 +154,15 @@ export default function TabTwoScreen() {
   {/* Big square */}
   <ThemedView style={styles.bigSquare}>
     <ThemedText style={styles.squareText}>
-      {aqi !== null ? `Current AQI: ${aqi}` : "Loading AQI..."}
+      {error ? error : 
+       aqi !== null ? `Current AQI: ${aqi}` : 
+       "Loading AQI..."}
     </ThemedText>
+    {aqiRating && (
+      <ThemedText style={styles.squareText}>
+        Rating: {aqiRating}
+      </ThemedText>
+    )}
   </ThemedView>
 </ThemedView>
 
