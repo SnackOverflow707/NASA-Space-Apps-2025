@@ -8,9 +8,9 @@ import { Fonts } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import happyImg from '../../assets/images/tamagachi-guys/regular.png';
-import sadImg from '../../assets/images/tamagachi-guys/sad.png';
+import sadImg from '../../assets/images/tamagachi-guys/house.png';
 import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
-import reImg from '../../assets/images/tamagachi-guys/house.png';
+import reImg from '../../assets/images/tamagachi-guys/sad.png';
 import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
 import button0icon from '../../assets/images/mask-icon.png';
 import button1icon from '../../assets/images/limit-outdoor.png';
@@ -50,14 +50,7 @@ export default function TabTwoScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
+      headerHeight={10}
     >
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
@@ -89,29 +82,16 @@ export default function TabTwoScreen() {
         ))}
       </ThemedView>
       
-  {/* Buttons stacked vertically */}
-  {/* --- Square with Buttons beside it --- */}
-<ThemedView style={styles.squareRow}>
-  {/* Big square */}
-  <ThemedView style={styles.bigSquare}>
-    <ThemedText style={styles.squareText}>Square</ThemedText>
-  </ThemedView>
-
-  {/* Random buttons beside the square */}
-  <ThemedView style={styles.buttonColumn}>
-    <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>Button A</ThemedText>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>Button B</ThemedText>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>Button C</ThemedText>
-    </TouchableOpacity>
-  </ThemedView>
-</ThemedView>
-
-
+      {/* Data buttons */}
+      <TouchableOpacity style={styles.dataButton}>
+        <ThemedText style={styles.dataText}>Data 1 (navigate)</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.dataButton}>
+        <ThemedText style={styles.dataText}>Data 2 (navigate)</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.dataButton}>
+        <ThemedText style={styles.dataText}>Data 3 (navigate)</ThemedText>
+      </TouchableOpacity>
       
       {/* Modal for more information */}
 {/* Modal popup */}
@@ -290,99 +270,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center'
   },
-  imageRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
-  },
-  
-  bigImageBox: {
-    width: 250,
-    height: 250,
-    backgroundColor: '#e8f1f8',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  
-  bigImage: {
-    width: '85%',
-    height: '85%',
-    resizeMode: 'contain',
-  },
-  
-  sideButtons: {
-    flexDirection: 'column',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    height: 250,
-  },
-  
-  sideButton: {
-    width: 70,
-    height: 40,
-    backgroundColor: '#bcd4e6',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-  },
-  squareRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 20,
-    marginVertical: 30,
-  },
-  
-  bigSquare: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#f7cad0', // soft pastel red
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  
-  squareText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  
-  buttonColumn: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 200,
-  },
-  
-  sideButton: {
-    width: 100,
-    height: 45,
-    backgroundColor: '#bcd4e6',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-  },
-  
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  
 });
 
