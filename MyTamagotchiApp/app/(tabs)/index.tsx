@@ -10,12 +10,12 @@ import React, { useState, useEffect } from 'react';
 import happyImg from '../../assets/images/tamagachi-guys/regular.png';
 import sadImg from '../../assets/images/tamagachi-guys/pollutants.png';
 import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
-import reImg from '../../assets/images/tamagachi-guys/sad.png';
+import reImg from '../../assets/images/tamagachi-guys/house.png';
 import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
-import button0icon from '../../assets/images/mask-icon.png';
-import button1icon from '../../assets/images/limit-outdoor.png';
+import button0icon from '../../assets/images/refresh.png';
+import button1icon from '../../assets/images/mask-icon.png'
 import button2icon from '../../assets/images/reduce-exposure.png';
-import button3icon from '../../assets/images/white-coach.png';
+import button3icon from '../../assets/images/couch.png';
 import { useUserCoordinates } from '../../components/get_usr_loc';
 
 
@@ -94,7 +94,7 @@ export default function TabTwoScreen() {
 
   // --- Button icons and actions ---
   const buttonIcons = [button0icon, button1icon, button2icon, button3icon];
-  const ButtonNames: ImageName[] = ['mask', 'lpa', 're', 'sad'];
+  const ButtonNames: ImageName[] = ['happy','mask', 're', 'lpa'];
 
   return (
     <ParallaxScrollView
