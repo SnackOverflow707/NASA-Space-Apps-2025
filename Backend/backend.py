@@ -14,18 +14,18 @@ from utils.data_getters import get_openmeteo_weather, get_aqi
 app = Flask(__name__)
 
 CORS(app, resources={
-    r"/get_data": {  # ✅ Changed to match new endpoint
+    r"/get_data": {  # Changed to match new endpoint
         "origins": ["http://localhost:8081"],
         "methods": ["POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
 })
 
-BBOX = 0.01  # ✅ Moved to global scope
+BBOX = 0.01  # Moved to global scope
 
 def set_bbox(latitude, longitude): 
     """Calculate bounding box from coordinates"""
-    # ✅ Removed jsonify returns - this is a helper function, not an endpoint
+    # Removed jsonify returns - this is a helper function, not an endpoint
     if latitude is None or longitude is None:
         raise ValueError('Latitude and longitude are required')
         
@@ -45,18 +45,17 @@ def set_bbox(latitude, longitude):
 
 def get_aqi_data(bbox): 
     """Get AQI data for a bounding box"""
-    # ✅ Renamed to avoid confusion, removed jsonify
     date = datetime.now().date().strftime("%Y-%m-%d")
     aqi_data = get_aqi(bbox, date)
-    return aqi_data  # ✅ Return raw data, not jsonified
+    return aqi_data  # Return raw data, not jsonified
 
 def get_weather_data(bbox): 
     """Get weather data for a bounding box"""
-    # ✅ Renamed, removed jsonify
+    # Renamed, removed jsonify
     current_weather = get_openmeteo_weather(bbox)
-    return current_weather  # ✅ Return raw data, not jsonified
+    return current_weather  #Return raw data, not jsonified
 
-@app.route("/get_data", methods=["POST", "OPTIONS"])  # ✅ Added OPTIONS for CORS
+@app.route("/get_data", methods=["POST", "OPTIONS"])  
 def backend_main(): 
     """Main endpoint that returns both AQI and weather data"""
     # Handle preflight request
@@ -91,7 +90,7 @@ def backend_main():
             "current_weather": weather_data
         }
         
-        return jsonify(response), 200  # ✅ Only jsonify at the endpoint level
+        return jsonify(response), 200  # Only jsonify at the endpoint level
 
     except ValueError as e:
         # Handle validation errors
