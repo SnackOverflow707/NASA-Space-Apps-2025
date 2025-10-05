@@ -48,18 +48,17 @@ export default function TabTwoScreen() {
           longitude: coords.longitude,
         }),
       });
+
       const data = await response.json();
       console.log('Backend response:', data);
+
+      if (data.AQI !== undefined) {
+        setAqi(data.AQI); // <-- save AQI in state
+      }
     } catch (error) {
       console.error('Failed to send coordinates:', error);
     }
   };
-  // --- This useEffect runs when coords changes ---
-  useEffect(() => {
-    if (coords) {
-      sendCoordsToBackend();
-    }
-  }, [coords]);
 
 
   // --- Function to switch images ---
@@ -118,8 +117,11 @@ export default function TabTwoScreen() {
 <ThemedView style={styles.squareRow}>
   {/* Big square */}
   <ThemedView style={styles.bigSquare}>
-    <ThemedText style={styles.squareText}>Square</ThemedText>
+    <ThemedText style={styles.squareText}>
+      {aqi !== null ? `Current AQI: ${aqi}` : "Loading AQI..."}
+    </ThemedText>
   </ThemedView>
+</ThemedView>
 
   {/* Random buttons beside the square */}
   <ThemedView style={styles.buttonColumn}>
