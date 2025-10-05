@@ -48,11 +48,13 @@ export const getImageSpeech = (imageName, aqi, susceptible = false) => {
 
   const parts = [];
 
-  if (aqiFlags.mask && !imageFlags.mask) parts.push("😷 You should wear a mask");
-  if (aqiFlags.reducedActivity && !imageFlags.reducedActivity) parts.push("🏃‍♂️ Reduce activity more");
-  if (aqiFlags.stayIndoors && !imageFlags.stayIndoors) parts.push("🏠 Consider staying indoors");
+  if (!aqiFlags.mask && imageFlags.mask) parts.push("A mask isn't nessary right now");
+  if (!aqiFlags.reducedActivity && imageFlags.reducedActivity && aqiFlags.stayIndoors) parts.push("Even with reduced activity, I still feel the effects of air pollution");
+  if (!aqiFlags.reducedActivity && imageFlags.reducedActivity && !aqiFlags.stayIndoors) parts.push("I don't need to reduce my activity right now");
+  if (!aqiFlags.stayIndoors && imageFlags.stayIndoors &&(aqiFlags.mask || aqiFlags.reducedActivity)) parts.push("It is safe to leave the house, with proper precautions");
+  if (!aqiFlags.stayIndoors && imageFlags.stayIndoors && !(aqiFlags.mask || aqiFlags.reducedActivity)) parts.push("It is safe to leave the house!");
 
-  if (parts.length === 0) return "👍 Current protection is sufficient";
+  if (parts.length === 0) return "Thanks for taking care of me!";
 
   return parts.join(" | ");
 };
