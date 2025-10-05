@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from utils.dtypes import ValidCoords 
 from datetime import datetime 
+from dateutil.relativedelta import relativedelta
 from flask_cors import CORS
 
 import sys 
@@ -9,7 +10,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.dirname(current_dir)
 sys.path.insert(0, backend_dir)
-from utils.data_getters import get_openmeteo_weather, get_aqi 
+from utils.data_getters import get_openmeteo_weather, get_aqi, get_pollutants 
 
 app = Flask(__name__)
 
@@ -22,6 +23,7 @@ CORS(app, resources={
 })
 
 BBOX = 0.01  # Moved to global scope
+PREVYRS = 5 
 
 def set_bbox(latitude, longitude): 
     """Calculate bounding box from coordinates"""
@@ -84,10 +86,20 @@ def backend_main():
         
         print("Fetching weather data...")
         weather_data = get_weather_data(bbox)
+        print("Weather data fetched!")
+
+        date = datetime.now().date().strftime("%Y-%m-%d")
+        print("Fetching pollutant data...")
+        pollutant_data = get_pollutants(bbox, bdate=datetime.now().date().strftime("%Y-%m-%d"), prevyrs=PREVYRS)
+        serializable_data = {}
+        for key, df in pollutant_data.items():
+            # Convert each DataFrame to a list of dicts
+            serializable_data[key] = df.to_dict(orient='records')
         
         response = {
             "aqi": aqi_data,
-            "current_weather": weather_data
+            "current_weather": weather_data, 
+            "pollutants": serializable_data
         }
         
         return jsonify(response), 200  # Only jsonify at the endpoint level

@@ -41,6 +41,8 @@ export default function TabTwoScreen() {
 
   const coords = useUserCoordinates(); 
   const [aqi, setAqi] = useState<number | null>(null);
+  const [weather, setWeather] = useState<any>(null); 
+  const [pollutants, setPollutants] = useState<any>(null); 
   const [aqiRating, setAqiRating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
@@ -55,11 +57,18 @@ export default function TabTwoScreen() {
           if (data.aqi !== undefined) {
             setAqi(data.aqi);
             setError(null);
-            
-            if (data.rating) {
-              setAqiRating(data.rating);
-            }
+          
+            // Set weather data
+          if (data.weather) {
+            setWeather(data.weather);
+            console.log('Weather data:', data.weather);
           }
+
+          if (data.pollutants) {
+            setPollutants(data.pollutants)
+            console.log('Pollutant data: ', data.pollutants)
+          }
+        }
         } catch (err) {
           console.error('Failed to fetch data:', err);
           setError('Failed to fetch AQI data');
@@ -169,22 +178,24 @@ export default function TabTwoScreen() {
       )}
     </ThemedView>
   </ImageBackground>
-</ThemedView>
-
-
-
-  {/* Random buttons beside the square */}
+    {/* Random buttons beside the square */}
   <ThemedView style={styles.buttonColumn}>
     <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>Button A</ThemedText>
+      <ThemedText style={styles.buttonText}>
+        {weather?.current?.temp ? `Temperature: ${Math.round(weather.current.temp)}°C` : 'Temp'}
+      </ThemedText>
     </TouchableOpacity>
     <TouchableOpacity style={styles.sideButton}>
-      <ThemedText style={styles.buttonText}>Button B</ThemedText>
+      <ThemedText style={styles.buttonText}>
+        {weather?.current?.precipitation != null ? `Precipitation: ${Math.round(weather.current.precipitation)}mm` : 'Precipitation'}
+      </ThemedText>
     </TouchableOpacity>
     <TouchableOpacity style={styles.sideButton}>
       <ThemedText style={styles.buttonText}>Button C</ThemedText>
     </TouchableOpacity>
   </ThemedView>
+</ThemedView>
+
 
       {/* Modal for more information */}
 {/* Modal popup */}
@@ -400,9 +411,9 @@ const styles = StyleSheet.create({
   },
   
   sideButton: {
-    width: 70,
-    height: 40,
-    backgroundColor: '#bcd4e6',
+    width: 225,
+    height: 60,
+    backgroundColor: '#76b6e8ff',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -466,13 +477,19 @@ squareText: {
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 200,
+    height: 230,
+    marginLeft: 80,
   },
   
   
   buttonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Platform.select({
+      ios: 'Avenir Next Rounded',
+      android: 'sans-serif',
+      default: 'System',
+    }),
+    fontWeight: '300',
     color: '#333',
   },
 

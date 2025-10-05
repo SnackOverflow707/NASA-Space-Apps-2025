@@ -10,7 +10,7 @@ import numpy as np
 
 
 #Gets pollutant data from NASA's TEMPO and AirNow (US only)
-def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_column_troposphere", locname="pyrsig_cache"):
+def get_pollutants(bbox, bdate, edate=None, prevyrs=None, locname="pyrsig_cache"):
     """
     Fetch and process TEMPO and AirNow air quality data for a date range.
     
@@ -22,33 +22,42 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
         Start date in format "YYYY-MM-DD"
     edate : str, optional
         End date in format "YYYY-MM-DD". If None, only fetches bdate.
-    tempokey : str, optional
-        TEMPO data key (default: NO2 vertical column troposphere)
+    prevyrs : int, optional
+        Number of previous years to fetch data for the same date(s).
+        For example, if bdate="2025-10-02" and prevyrs=3, will fetch
+        data for 2025-10-02, 2024-10-02, 2023-10-02, and 2022-10-02.
     locname : str, optional
         Location name for working directory. If None, uses date range as name.
         
     Returns:
     --------
-    dict : Dictionary containing:
-        - 'tempo_hourly': Hourly averaged TEMPO data (all columns)
-        - 'tempo_no2_hourly': Hourly averaged TEMPO NO2 only
-        - 'airnow_no2_hourly': Hourly median AirNow NO2 (or empty if no data)
-        - 'tempo_df': Raw TEMPO dataframe
-        - 'airnow_df': Raw AirNow dataframe (or empty if no data)
-        - 'date_range': List of dates processed
-        - 'airnow_available': Boolean indicating if AirNow data was found
+    dict : Dictionary containing pollutant data with year labels
     """  
     if edate is None:
         edate = bdate
     
-    # Generate date list
+    # Generate base date list
     start = datetime.strptime(bdate, "%Y-%m-%d")
     end = datetime.strptime(edate, "%Y-%m-%d")
-    date_list = []
+    base_dates = []
     current = start
     while current <= end:
-        date_list.append(current.strftime("%Y-%m-%d"))
+        base_dates.append(current)
         current += timedelta(days=1)
+    
+    # If prevyrs is specified, create dates for previous years
+    all_dates = []
+    if prevyrs:
+        for year_offset in range(prevyrs, -1, -1):  # Goes from prevyrs down to 0
+            for date in base_dates:
+                # Subtract years from the date
+                prev_date = date.replace(year=date.year - year_offset)
+                all_dates.append(prev_date)
+    else:
+        all_dates = base_dates
+    
+    # Convert to string format
+    date_list = [d.strftime("%Y-%m-%d") for d in all_dates]
     
     # TEMPO pollutants to fetch
     tempo_products = {
@@ -73,6 +82,8 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
             try:
                 df = api.to_dataframe(key, unit_keys=False, parse_dates=True, backend="xdr")
                 if not df.empty:
+                    # Add year column to track which year this data is from
+                    df['year'] = datetime.strptime(date, "%Y-%m-%d").year
                     all_data[pollutant].append(df)
                     print(f"TEMPO {pollutant}: {len(df)} records")
             except Exception as e:
@@ -89,6 +100,8 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
             try:
                 df = api.to_dataframe(key, unit_keys=False, parse_dates=True)
                 if not df.empty:
+                    # Add year column
+                    df['year'] = datetime.strptime(date, "%Y-%m-%d").year
                     airnow_data[pollutant].append(df)
                     print(f"AirNow {pollutant}: {len(df)} records")
             except Exception as e:
@@ -100,18 +113,21 @@ def get_pollutants(bbox, bdate, edate=None, tempokey="tempo.l2.no2.vertical_colu
     for pollutant in tempo_products.keys():
         if all_data[pollutant]:
             combined_data[f'tempo_{pollutant}'] = pd.concat(all_data[pollutant], ignore_index=True)
-            combined_data[f'tempo_{pollutant}'] = combined_data[f'tempo_{pollutant}'].sort_values('time')
+            combined_data[f'tempo_{pollutant}'] = combined_data[f'tempo_{pollutant}'].sort_values(['year', 'time'])
     
     for pollutant in airnow_products.keys():
         if airnow_data[pollutant]:
             combined_data[f'airnow_{pollutant}'] = pd.concat(airnow_data[pollutant], ignore_index=True)
-            combined_data[f'airnow_{pollutant}'] = combined_data[f'airnow_{pollutant}'].sort_values('time')
+            combined_data[f'airnow_{pollutant}'] = combined_data[f'airnow_{pollutant}'].sort_values(['year', 'time'])
     
     # Summary
     print(f"\n{'='*60}")
     print("Data Summary:")
     for key, df in combined_data.items():
         print(f"  {key}: {len(df)} records")
+        if prevyrs:
+            years = df['year'].unique()
+            print(f"    Years included: {sorted(years)}")
     print(f"{'='*60}\n")
     
     return combined_data
@@ -276,11 +292,11 @@ def rate_aqi(aqi):
     
     # Map ranges to strings
     rating_list = [
-        (VERY_GOOD, "very good"),
+        (VERY_GOOD, "verygood"),
         (GOOD, "good"),
         (FAIR, "fair"),
         (POOR, "poor"),
-        (VERY_POOR, "very poor")
+        (VERY_POOR, "verypoor")
     ]
 
     # Check which range AQI falls in
