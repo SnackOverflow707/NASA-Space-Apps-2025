@@ -83,8 +83,16 @@ export function AqiCardPopup({ aqi, error }: Props) {
               <ThemedText style={styles.squareText}>{error}</ThemedText>
             ) : (
               <>
-                <ThemedText style={styles.squareText}>Current Air Quality Index:</ThemedText>
-                <ThemedText style={styles.aqiValue}>{aqi}</ThemedText>
+                <ThemedText style={styles.squareText}>What is AQI? {'\n\n'}</ThemedText>
+                <ThemedText style={[styles.squareText, { fontWeight: '100', fontSize: 16, }]}>
+
+                 The Air Quality Index (AQI) is a system that tells us how clean or “friendly” the air around us is. 
+                 The rating, a number from 0 to 200+, is based on the amount of tiny invisible particles, 
+                 (like the ones from cars and factories) and specific chemicals called "pollutants" in the atmosphere. 
+                 Knowing the AQI helps us decide when it’s perfect to go outside and play, or when it's better to 
+                 stay inside. It's a tool that allows us to stay safe and healthy while having fun! 
+
+                </ThemedText>
               </>
             )}
             <TouchableOpacity
@@ -128,6 +136,20 @@ export const ImageWithLoadingBackground = ({ imageSource, aqi, error }: ImageWit
   );
 };
 
+
+interface WeatherData {
+  time: number;
+  temp: number;
+  humidity: number;
+  pressure: number;
+  wind_speed: number;
+  wind_direction: number;
+  precipitation: number;
+  cloud_cover: number;
+}
+
+
+
 const styles = StyleSheet.create({
   squareBackgroundImage: 
   { width: 200, 
@@ -145,17 +167,23 @@ const styles = StyleSheet.create({
   aqiValue: { fontSize: 40, fontWeight: 'bold', textAlign: 'center' },
   textContainer: {justifyContent: 'center',alignItems: 'center',textAlign: 'center', backgroundColor: 'transparent',}, 
   modalBackground: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { width: 250, backgroundColor: 'white', borderRadius: 12, padding: 20, alignItems: 'center' },
+  modalContainer: { width: 500, backgroundColor: 'white', borderRadius: 12, padding: 20, alignItems: 'center' },
   modalCloseButton: { marginTop: 20, backgroundColor: '#2196F3', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
     loadingBox: {
-    width: 200,
+    width: 250,
     height: 300,
     backgroundColor: '#faabddff', // solid pink square
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
+    padding: 20,  
   },
 });
+
+
+
+
+
 
 
 

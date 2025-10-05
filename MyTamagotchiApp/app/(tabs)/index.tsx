@@ -22,6 +22,7 @@ import aqifair from '../../assets/images/widgets/fair.jpg';
 import aqipoor from '../../assets/images/widgets/poor.jpg';
 import aqiverypoor from '../../assets/images/widgets/verypoor.jpg';
 import aqihazardous from '../../assets/images/widgets/hazardous.jpg';
+import surpriseButton from '../../assets/images/surprise.jpg'; 
 import { useUserCoordinates } from '../../components/get_usr_loc'; 
 import { ImageBackground } from 'react-native';
 import { getProtectionFlags, getImageProtection, getImageSpeech } from "./bird_functions";
@@ -45,9 +46,9 @@ export default function TabTwoScreen() {
   const [aqi, setAqi] = useState<number | null>(null);
   const [weather, setWeather] = useState<any>(null); 
   const [pollutants, setPollutants] = useState<any>(null); 
-  const [aqiRating, setAqiRating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
+  const [surpriseData, setSurpriseData] = useState(null);
 
   // Fetch backend data when coordinates change
   useEffect(() => {
@@ -102,6 +103,24 @@ export default function TabTwoScreen() {
     return imageMap[currentImage] || 'happy';
   };
 
+const surpriseMe = async () => {
+  try {
+    const response = await fetch("http://localhost:5001/surprise", {
+      method: "POST",  // Add this!
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const result = await response.json();
+    console.log("Surprise me button --> city ", result.city);
+    setSurpriseData(result); 
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+
+
+
   // --- Function to switch images ---
   const showImage = (imageName: ImageName) => {
     // If user asked for "happy", decide dynamically
@@ -135,13 +154,9 @@ export default function TabTwoScreen() {
 
 return (
     <ParallaxScrollView
-<<<<<<< Updated upstream
       headerImage={<ThemedView style={{ height: 0, backgroundColor: 'transparent' }} />}
       headerBackgroundColor={{ light: 'transparent', dark: 'transparent' }}
-=======
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
       //headerHeight={10}
->>>>>>> Stashed changes
     >
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
@@ -223,6 +238,19 @@ return (
       <ThemedText style={styles.buttonText}>Button C</ThemedText>
     </TouchableOpacity>
   </ThemedView>
+
+{/*surprise me button!*/} 
+<ThemedView> 
+  <TouchableOpacity onPress={surpriseMe} style={styles.surpriseMe}>
+    <ImageBackground
+      source={surpriseButton}
+      style={styles.surpriseMe}
+      imageStyle={{ borderRadius: 20 }}>
+      <ThemedText style={styles.buttonText}>Surprise Me!</ThemedText>
+    </ImageBackground>
+  </TouchableOpacity>
+  </ThemedView>
+
 </ThemedView>
 
 
@@ -376,6 +404,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+
+surpriseMe: {
+  marginTop: 20,
+  marginLeft: 60, 
+  width: 300,
+  height: 200,
+  padding: 15,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center', 
+},
+
   modalQuestion: {
     fontSize: 18,
     fontWeight: 'bold',
