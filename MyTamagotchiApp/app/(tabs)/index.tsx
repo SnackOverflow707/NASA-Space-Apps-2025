@@ -132,8 +132,8 @@ export default function TabTwoScreen() {
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerHeight={10}
+      headerImage={<ThemedView style={{ height: 0, backgroundColor: 'transparent' }} />}
+      headerBackgroundColor={{ light: 'transparent', dark: 'transparent' }}
     >
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
