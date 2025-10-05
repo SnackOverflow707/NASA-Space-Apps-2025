@@ -16,9 +16,14 @@ import button0icon from '../../assets/images/refresh.png';
 import button1icon from '../../assets/images/mask-icon.png'
 import button2icon from '../../assets/images/reduce-exposure.png';
 import button3icon from '../../assets/images/couch.png';
-import { useUserCoordinates } from '../../components/get_usr_loc';
-
-
+import aqiverygood from '../../assets/images/widgets/verygood.jpg';
+import aqigood from '../../assets/images/widgets/good.jpg';
+import aqifair from '../../assets/images/widgets/fair.jpg';
+import aqipoor from '../../assets/images/widgets/poor.jpg';
+import aqiverypoor from '../../assets/images/widgets/verypoor.jpg';
+import aqihazardous from '../../assets/images/widgets/hazardous.jpg';
+import { useUserCoordinates } from '../../components/get_usr_loc'; 
+import { ImageBackground } from 'react-native';
 
 type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
 
@@ -96,7 +101,6 @@ export default function TabTwoScreen() {
   }, [coords?.latitude, coords?.longitude]); // Only re-run when lat/lon actually changes
 
 
-
   // --- Function to switch images ---
   const showImage = (imageName: ImageName) => {
     const map: Record<ImageName, any> = {
@@ -107,6 +111,18 @@ export default function TabTwoScreen() {
       mask: maskImg,
     };
     setCurrentImage(map[imageName]);
+  };
+
+  //function to select aqi widget background 
+  const getAqiBackgroundImage = (aqiValue: number | null) => {
+    if (aqiValue === null) return null;
+    
+    if (aqiValue <= 33) return aqiverygood;           // Good
+    if (aqiValue <= 67) return aqigood;      // Moderate
+    if (aqiValue <= 100) return aqifair;     // Unhealthy for Sensitive Groups
+    if (aqiValue <= 150) return aqipoor; // Unhealthy
+    if (aqiValue <= 200) return aqiverypoor;
+    return aqihazardous;                           // Very Unhealthy/Hazardous
   };
 
   // --- Button icons and actions ---
@@ -151,20 +167,25 @@ export default function TabTwoScreen() {
   {/* Buttons stacked vertically */}
   {/* --- Square with Buttons beside it --- */}
 <ThemedView style={styles.squareRow}>
-  {/* Big square */}
-  <ThemedView style={styles.bigSquare}>
-    <ThemedText style={styles.squareText}>
-      {error ? error : 
-       aqi !== null ? `Current AQI: ${aqi}` : 
-       "Loading AQI..."}
-    </ThemedText>
-    {aqiRating && (
+  <ImageBackground
+    source={getAqiBackgroundImage(aqi)!}
+    style={styles.squareBackgroundImage} // container dimensions
+    imageStyle={{ borderRadius: 20 }} // round corners of the image
+  >
+    <ThemedView style={styles.textContainer}>
       <ThemedText style={styles.squareText}>
-        Rating: {aqiRating}
+        {error ? error : aqi !== null ? `Current Air Quality Index: ${aqi}` : "Loading AQI..."}
       </ThemedText>
-    )}
-  </ThemedView>
+      {aqiRating && (
+        <ThemedText style={styles.squareText}>
+          Rating: {aqiRating}
+        </ThemedText>
+      )}
+    </ThemedView>
+  </ImageBackground>
 </ThemedView>
+
+
 
   {/* Random buttons beside the square */}
   <ThemedView style={styles.buttonColumn}>
@@ -401,6 +422,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 2,
   },
+
   squareRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -408,24 +430,50 @@ const styles = StyleSheet.create({
     gap: 20,
     marginVertical: 30,
   },
+
+squareBackgroundImage: {
+  width: 200,
+  height: 300,
+  justifyContent: 'center', // centers children vertically
+  alignItems: 'center',     // centers children horizontally
+},
+
+textContainer: {
+  justifyContent: 'center',
+  alignItems: 'center',
+  textAlign: 'center', // ensures text is centered
+  backgroundColor: 'transparent',
+},
+
+squareText: {
+  fontSize: 20,
+  //fontWeight: '800',  // Extra bold makes it more playful
+  fontFamily: Platform.select({
+    ios: 'Avenir Next Rounded',
+    android: 'sans-serif',
+    default: 'System',
+  }),
+  //fontFamily: 'System',  // Clean and readable
+  fontWeight: '400',
+  color: '#333',
+  textAlign: 'center', // crucial for multi-line text
+  zIndex: 1,
+  textShadowColor: 'rgba(255, 255, 255, 0.8)',
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 3,
+},
   
   bigSquare: {
     width: 200,
     height: 200,
-    backgroundColor: '#f7cad0', // soft pastel red
-    borderRadius: 20,
+    //backgroundColor: '#f7cad0', // soft pastel red
+    //borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  
-  squareText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    //shadowColor: '#000',
+    //shadowOpacity: 0.1,
+    //shadowRadius: 6,
+    //hadowOffset: { width: 0, height: 3 },
   },
   
   buttonColumn: {
