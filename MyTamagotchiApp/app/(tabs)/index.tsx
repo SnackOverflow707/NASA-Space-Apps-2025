@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import happyImg from '../../assets/images/tamagachi-guys/regular.png';
 import sadImg from '../../assets/images/tamagachi-guys/sad.png';
 import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
@@ -16,6 +16,8 @@ import button0icon from '../../assets/images/mask-icon.png';
 import button1icon from '../../assets/images/limit-outdoor.png';
 import button2icon from '../../assets/images/reduce-exposure.png';
 import button3icon from '../../assets/images/white-coach.png';
+import { useUserCoordinates } from '../components/get_usr_loc';
+
 
 type ImageName = 'happy' | 'sad' | 'lpa' | 're' | 'mask';
 
@@ -29,6 +31,35 @@ export default function TabTwoScreen() {
   //Variable for if user is susceptible to pollution
 
   const [susceptible, setSusceptible] = useState(false);
+
+  const coords = useUserCoordinates(); 
+  const [aqi, setAqi] = useState<number | null>(null);
+
+    // --- Function to send coordinates to backend ---
+  const sendCoordsToBackend = async () => {
+    if (!coords) return;
+
+    try {
+      const response = await fetch('http://localhost:5000/aqi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }),
+      });
+      const data = await response.json();
+      console.log('Backend response:', data);
+    } catch (error) {
+      console.error('Failed to send coordinates:', error);
+    }
+  };
+  // --- This useEffect runs when coords changes ---
+  useEffect(() => {
+    if (coords) {
+      sendCoordsToBackend();
+    }
+  }, [coords]);
 
 
   // --- Function to switch images ---
@@ -94,8 +125,12 @@ export default function TabTwoScreen() {
 <ThemedView style={styles.squareRow}>
   {/* Big square */}
   <ThemedView style={styles.bigSquare}>
-    <ThemedText style={styles.squareText}>Square</ThemedText>
+    <ThemedText style={styles.squareText}>
+      {aqi !== null ? `Current AQI: ${aqi}` : "Loading AQI..."}
+    </ThemedText>
   </ThemedView>
+</ThemedView>
+
 
   {/* Random buttons beside the square */}
   <ThemedView style={styles.buttonColumn}>
