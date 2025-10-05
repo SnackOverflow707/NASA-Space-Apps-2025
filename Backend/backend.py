@@ -63,10 +63,7 @@ def backend_main():
     if request.method == 'OPTIONS':
         return '', 200
         
-    try:
-        print("=" * 50)
-        print("Received POST request to /get_data")
-        
+    try:       
         data = request.get_json()
         print(f"Request data: {data}")
         
@@ -80,7 +77,6 @@ def backend_main():
         
         # Get bounding box
         bbox = set_bbox(latitude=latitude, longitude=longitude)
-        print(f"Calculated bbox: {bbox}")
         
         # Get data
         print("Fetching AQI data...")
@@ -89,20 +85,16 @@ def backend_main():
         
         print("Fetching weather data...")
         weather_data = get_weather_data(bbox)
-        print(f"Weather: {weather_data}")
         
         response = {
             "aqi": aqi_data,
             "current_weather": weather_data
         }
-        print(f"Sending response: {response}")
-        print("=" * 50)
         
         return jsonify(response), 200  # ✅ Only jsonify at the endpoint level
 
     except ValueError as e:
         # Handle validation errors
-        print(f'Validation error: {str(e)}')
         return jsonify({'error': str(e)}), 400
         
     except Exception as e:
@@ -115,7 +107,5 @@ def backend_main():
 
 
 if __name__ == "__main__":
-    print("=" * 50)
-    print("🚀 Starting Flask server on port 5001...")
-    print("=" * 50)
+
     app.run(debug=True, port=5001, host='127.0.0.1')
