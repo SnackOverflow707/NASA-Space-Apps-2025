@@ -8,9 +8,9 @@ import { Fonts } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import happyImg from '../../assets/images/tamagachi-guys/regular.png';
-import sadImg from '../../assets/images/tamagachi-guys/sad.png';
+import sadImg from '../../assets/images/tamagachi-guys/pollutants.png';
 import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
-import reImg from '../../assets/images/tamagachi-guys/house.png';
+import reImg from '../../assets/images/tamagachi-guys/sad.png';
 import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
 import button0icon from '../../assets/images/mask-icon.png';
 import button1icon from '../../assets/images/limit-outdoor.png';
@@ -81,14 +81,7 @@ export default function TabTwoScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
+      headerHeight={10}
     >
       {/* --- Your mockup starts here --- */}
       <ThemedView style={styles.imageBox}>
@@ -125,12 +118,8 @@ export default function TabTwoScreen() {
 <ThemedView style={styles.squareRow}>
   {/* Big square */}
   <ThemedView style={styles.bigSquare}>
-    <ThemedText style={styles.squareText}>
-      {aqi !== null ? `Current AQI: ${aqi}` : "Loading AQI..."}
-    </ThemedText>
+    <ThemedText style={styles.squareText}>Square</ThemedText>
   </ThemedView>
-</ThemedView>
-
 
   {/* Random buttons beside the square */}
   <ThemedView style={styles.buttonColumn}>
@@ -325,6 +314,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center'
   },
+
   imageRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -403,15 +393,6 @@ const styles = StyleSheet.create({
     height: 200,
   },
   
-  sideButton: {
-    width: 100,
-    height: 45,
-    backgroundColor: '#bcd4e6',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-  },
   
   buttonText: {
     fontSize: 16,
@@ -419,5 +400,6 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   
+>>>>>>> c7f689263c37029b04c9a936ca9d186c63017a56
 });
 
