@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 
+
+
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 export function useUserCoordinates() {
-  const [coords, setCoords] = useState(null);
+  // <-- type the state to Coordinates or null
+  const [coords, setCoords] = useState<Coordinates | null>(null);
 
   useEffect(() => {
-    const getCoordsFromCity = async (cityName) => {
+    const getCoordsFromCity = async (cityName: string) => {
       try {
         const response = await fetch(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`
@@ -43,6 +51,4 @@ export function useUserCoordinates() {
   }, []);
 
   return coords; // null until coordinates are set
-
 }
-
