@@ -25,15 +25,15 @@ export const getProtectionFlags = (aqi: number, susceptible = false) => {
 export const getImageProtection = (imageName, susceptible = false) => {
   switch(imageName) {
     case "mask":
-      return { mask: true, reducedActivity: false, stayIndoors: false };
+      return { mask: true, reducedActivity: false, stayIndoors: false, polluted: false };
     case "lpa": // e.g., "limited physical activity"
-      return        { mask: false, reducedActivity: true, stayIndoors: false };
+      return        { mask: false, reducedActivity: true, stayIndoors: false, polluted: false  };
     case "re": // e.g., "resting / indoors"
-      return { mask: false, reducedActivity: false, stayIndoors: true };
-    case "happy": // normal state
+      return { mask: false, reducedActivity: false, stayIndoors: true, polluted: false  };
     case "sad":
+      return { mask: false, reducedActivity: false, stayIndoors: false, polluted: true  };
     default:
-      return { mask: false, reducedActivity: false, stayIndoors: false };
+      return { mask: false, reducedActivity: false, stayIndoors: false, polluted: false  };
   }
 };
 
@@ -53,7 +53,7 @@ export const getImageSpeech = (imageName, aqi, susceptible = false) => {
   if (!aqiFlags.reducedActivity && imageFlags.reducedActivity && !aqiFlags.stayIndoors) parts.push("I don't need to reduce my activity right now");
   if (!aqiFlags.stayIndoors && imageFlags.stayIndoors &&(aqiFlags.mask || aqiFlags.reducedActivity)) parts.push("It is safe to leave the house, with proper precautions");
   if (!aqiFlags.stayIndoors && imageFlags.stayIndoors && !(aqiFlags.mask || aqiFlags.reducedActivity)) parts.push("It is safe to leave the house!");
-
+  if (imageFlags.polluted )parts.push("The air pollution is affecting me");
   if (parts.length === 0) return "Thanks for taking care of me!";
 
   return parts.join(" | ");
