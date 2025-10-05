@@ -289,7 +289,7 @@ def rate_aqi(aqi):
             return label
     
     # If AQI is outside all ranges
-    return "HAZARDOUS" 
+    return "hazardous" 
 
 
 
