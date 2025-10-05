@@ -8,7 +8,11 @@ import { Fonts } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import happyImg from '../../assets/images/tamagachi-guys/regular.png';
+<<<<<<< HEAD
 import sadImg from '../../assets/images/tamagachi-guys/house.png';
+=======
+import sadImg from '../../assets/images/tamagachi-guys/pollutants.png';
+>>>>>>> c7f689263c37029b04c9a936ca9d186c63017a56
 import lpaImg from '../../assets/images/tamagachi-guys/couch.png';
 import reImg from '../../assets/images/tamagachi-guys/sad.png';
 import maskImg from '../../assets/images/tamagachi-guys/mask.png'; 
@@ -270,5 +274,93 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center'
   },
+<<<<<<< HEAD
+=======
+  imageRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  
+  bigImageBox: {
+    width: 250,
+    height: 250,
+    backgroundColor: '#e8f1f8',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  
+  bigImage: {
+    width: '85%',
+    height: '85%',
+    resizeMode: 'contain',
+  },
+  
+  sideButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 250,
+  },
+  
+  sideButton: {
+    width: 70,
+    height: 40,
+    backgroundColor: '#bcd4e6',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  squareRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+    marginVertical: 30,
+  },
+  
+  bigSquare: {
+    width: 200,
+    height: 200,
+    backgroundColor: '#f7cad0', // soft pastel red
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  
+  squareText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  
+  buttonColumn: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 200,
+  },
+  
+  
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  
+>>>>>>> c7f689263c37029b04c9a936ca9d186c63017a56
 });
 
