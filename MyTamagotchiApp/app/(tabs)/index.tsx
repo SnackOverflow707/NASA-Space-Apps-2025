@@ -51,7 +51,8 @@ export default function TabTwoScreen() {
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
   const [surpriseData, setSurpriseData] = useState(null);
   const [isPressed, setIsPressed] = useState(false);
-
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [prModalVisible, setprModalVisible] = useState(false);
   // Fetch backend data when coordinates change
   useEffect(() => {
     const fetchData = async () => {
@@ -229,7 +230,9 @@ return (
 
     {/* Random buttons beside the square */}
     <ThemedView style={styles.buttonColumn}>
-      <TouchableOpacity style={styles.sideButton}>
+      <TouchableOpacity style={styles.sideButton}
+        onPress={() => setInfoModalVisible(true)}
+>
         <Image
           source={cloudImg}
           style={styles.backgroundIcon}
@@ -241,7 +244,8 @@ return (
         </ThemedText>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.sideButton}>
+      <TouchableOpacity style={styles.sideButton}
+        onPress={() => setprModalVisible(true)}>
         <Image
           source={cloudImg}
           style={styles.backgroundIcon}
@@ -347,6 +351,49 @@ return (
   </ThemedView>
 </Modal>
       
+{/* modal popup for temprature */}
+<Modal
+  transparent
+  visible={infoModalVisible}
+  animationType="slide"
+  onRequestClose={() => setInfoModalVisible(false)}
+>
+  <ThemedView style={styles.modalBackground}>
+    <ThemedView style={styles.modalContainer}>
+      <ThemedText style={styles.modalTitle}>Temprature {'\n\n'}</ThemedText>
+      Temperature can have a big effect on the air we breathe. On hot days, the sun warms the ground and the air, which can cause some pollutants, like ozone, to form faster. This means that the air can become “less friendly” to breathe, especially for people who have asthma or allergies. On cooler days, the air may stay cleaner because these chemical reactions happen more slowly. Temperature can also affect how air moves—warm air can rise and mix, spreading pollutants around, while cold air can stay trapped near the ground, making the air more polluted in one area. Understanding how temperature changes the air helps us decide the best times to play outside safely.
+      <TouchableOpacity
+        style={styles.modalCloseButton}
+        onPress={() => setInfoModalVisible(false)}
+      >
+        <ThemedText style={{ color: 'white' }}>Got it!</ThemedText>
+      </TouchableOpacity>
+    </ThemedView>
+  </ThemedView>
+</Modal>
+
+{/* modal popup for percipitation */}
+<Modal
+  transparent
+  visible={prModalVisible}
+  animationType="slide"
+  onRequestClose={() => setprModalVisible(false)}
+>
+  <ThemedView style={styles.modalBackground}>
+    <ThemedView style={styles.modalContainer}>
+      <ThemedText style={styles.modalTitle}> Precipitation {'\n\n'}</ThemedText>
+      Rain and snow can help keep the air clean! When it rains or snows, the water drops fall through the air and can trap tiny particles and pollutants, pulling them down to the ground. This acts like a natural cleaning system, making the air fresher and easier to breathe. On days with lots of precipitation, there are usually fewer smoggy or smoky conditions, so it’s safer to play outside. However, when the weather is dry, these pollutants can stay in the air longer, making it more important to check air quality before going outdoors.
+      <TouchableOpacity
+        style={styles.modalCloseButton}
+        onPress={() => setprModalVisible(false)}
+      >
+        <ThemedText style={{ color: 'white' }}>Got it!</ThemedText>
+      </TouchableOpacity>
+    </ThemedView>
+  </ThemedView>
+</Modal>
+
+
       {/* --- Your mockup ends here --- */}
 </ParallaxScrollView>
 ); 
@@ -669,6 +716,21 @@ squareText: {
     justifyContent: 'center', 
     backgroundColor: '#aad2f3ff',
   }, 
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: '#333',
+  },
+  modalCloseButton: {
+    backgroundColor: '#4CAF50',         // green button
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+
   
 });
 
