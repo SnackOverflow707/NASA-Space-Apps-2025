@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from utils.dtypes import ValidCoords 
 from datetime import datetime 
-from dateutil.relativedelta import relativedelta
 from flask_cors import CORS
 
 import sys 
@@ -60,6 +59,7 @@ def surpriseMe():
     response = surprise_me()      
     return jsonify(response), 200
 
+
 @app.route("/get_pollutants", methods=["POST", "OPTIONS"])  
 def pollutant_score(): 
     if request.method == 'OPTIONS':
@@ -76,7 +76,7 @@ def pollutant_score():
         bbox = set_bbox(latitude=latitude, longitude=longitude)
         pollutants_data = get_pollutants(bbox)
         pollutant_score = calculate_current_pollutants(pollutants_data)
-
+        print("Getting pollutant score:")
         response = pollutant_score 
         return jsonify(response), 200
 
@@ -91,7 +91,7 @@ def pollutant_score():
         traceback.print_exc()
         print("=" * 50)
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
-    
+
 
 @app.route("/get_data", methods=["POST", "OPTIONS"])  
 def backend_main(): 

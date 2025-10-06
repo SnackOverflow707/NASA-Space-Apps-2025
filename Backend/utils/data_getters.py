@@ -4,6 +4,7 @@ import pyrsig
 import pandas as pd
 import os
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import requests
 import numpy as np 
 import shutil 
@@ -178,6 +179,8 @@ def get_aqi(bbox, start_date, end_date=None, hour=None):
     
 def get_pollutants(bbox, bdate=None, locname="pyrsig_cache", months=1): 
 
+    print("getting pollutants data")
+
     pollutants = {
         'no2': 'tempo.l2.no2.vertical_column_troposphere',
         #'formaldehyde': 'tempo.l2.hcho.vertical_column_troposphere',
@@ -241,6 +244,8 @@ def get_pollutants(bbox, bdate=None, locname="pyrsig_cache", months=1):
 
 
 def calculate_current_pollutants(pollutants): #all pollutants are dataframes. dict --> key, df 
+
+    print("Calculating average pollutant scores.")
 
     GOOD = 3
     FAIR = 2
