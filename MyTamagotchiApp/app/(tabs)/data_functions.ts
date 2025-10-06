@@ -17,7 +17,7 @@ export const sendCoordsToBackend = async (coords: any) => {
   return {
     aqi: data.aqi,
     weather: data.current_weather,  // Extract weather data
-    pollutants: data.pollutants
+    //pollutants: data.pollutants
   };
   
   // Return the data so it can be used

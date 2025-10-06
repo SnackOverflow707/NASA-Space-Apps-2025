@@ -51,6 +51,8 @@ export default function TabTwoScreen() {
   const [speechText, setSpeechText] = useState("Hello! I'm a bird!");
   const [surpriseData, setSurpriseData] = useState(null);
   const [isPressed, setIsPressed] = useState(false);
+  const [pollutantScore, setPollutantScore] = useState(null);
+const [Ploading, setLoading] = useState(true);
 
   // Fetch backend data when coordinates change
   useEffect(() => {
@@ -68,11 +70,6 @@ export default function TabTwoScreen() {
             setWeather(data.weather);
             console.log('Weather data:', data.weather);
           }
-
-          if (data.pollutants) {
-            setPollutants(data.pollutants)
-            console.log('Pollutant data: ', data.pollutants)
-          }
         }
         } catch (err) {
           console.error('Failed to fetch data:', err);
@@ -83,6 +80,44 @@ export default function TabTwoScreen() {
 
     fetchData();
   }, [coords?.latitude, coords?.longitude]);
+
+
+useEffect(() => {
+  const fetchPollutants = async () => {
+    // Wait until coords are available
+    if (!coords || !coords.latitude || !coords.longitude) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const response = await fetch("http://localhost:5001/get_pollutants", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude: coords.latitude,
+          longitude: coords.longitude
+        })
+      });
+      
+      const result = await response.json();
+      console.log("Pollutant score:", result);
+      setPollutantScore(result);
+      
+    } catch (error) {
+      console.error("Error fetching pollutants:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPollutants();
+}, [coords]); // Add coords as dependency so it runs when coords change // Empty array means it runs once when component mounts
+
+
 
     // Update speech text when AQI or susceptibility changes
   useEffect(() => {
@@ -206,26 +241,6 @@ return (
   
 <ThemedView style={styles.squareRow}>
   <ImageWithLoadingBackground aqi={aqi} error={error} imageSource = {getAqiBackgroundImage(aqi, aqiverygood, aqigood, aqifair, aqipoor, aqiverypoor, aqihazardous)!}/>
- {/*<AqiCardPopup aqi={aqi} error={error} /> */}
- {/* 
-  <ImageBackground
-    source={getAqiBackgroundImage(aqi, aqiverygood, aqigood, aqifair, aqipoor, aqiverypoor, aqihazardous)!}
-    style={styles.squareBackgroundImage} // container dimensions
-    imageStyle={{ borderRadius: 20 }} // round corners of the image
-  >
-<ThemedView style={styles.textContainer}>
-  {error ? (
-    <ThemedText style={styles.squareText}>{error}</ThemedText>
-  ) : aqi !== null ? (
-    <ThemedText style={styles.squareText}>
-      Current Air Quality Index: {'\n\n'}
-      <ThemedText style={styles.aqiValue}>{aqi}</ThemedText>
-    </ThemedText>
-  ) : (
-    <LoadingMessage/>
-  )}
-</ThemedView> 
-  </ImageBackground> */}
 
     {/* Random buttons beside the square */}
     <ThemedView style={styles.buttonColumn}>
@@ -253,14 +268,28 @@ return (
         </ThemedText>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.sideButton}>
-        <Image
-          source={cloudImg}
-          style={styles.backgroundIcon}
-        />
-        <ThemedText style={styles.buttonText}>Button C</ThemedText>
-      </TouchableOpacity>
-    </ThemedView>
+
+
+<TouchableOpacity style={styles.sideButton}>
+  <Image
+    source={cloudImg}
+    style={styles.backgroundIcon}
+  />
+  {Ploading ? (
+    <ThemedText style={styles.buttonText}>Talking to satellites...</ThemedText>
+  ) : pollutantScore ? (
+    <ThemedText style={styles.buttonText}>
+      Pollutant Score: {JSON.stringify(pollutantScore)}
+    </ThemedText>
+  ) : (
+    <ThemedText style={styles.buttonText}>
+      {weather?.current?.humidity != null
+        ? `Humidity: ${Math.round(weather.current.humidity)}%`  // Fixed: was precipitation
+        : "Humidity"}
+    </ThemedText>
+  )}
+</TouchableOpacity>
+</ThemedView>
 
 {/*surprise me button!*/} 
 <ThemedView>
