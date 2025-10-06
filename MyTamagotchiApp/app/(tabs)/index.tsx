@@ -238,6 +238,10 @@ return (
       
   {/* Buttons stacked vertically */}
   {/* --- Square with Buttons beside it --- */}
+
+  <ThemedView style={styles.squareRow}>
+    <ThemedText></ThemedText>
+  </ThemedView>
  
   
 <ThemedView style={styles.squareRow}>

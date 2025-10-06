@@ -177,6 +177,8 @@ def get_aqi(bbox, start_date, end_date=None, hour=None):
 
         return int(accum / len(us_aqi)) #average aqi over specified range 
     
+    
+    
 def get_pollutants(bbox, bdate=None, locname="pyrsig_cache", months=1): 
 
     print("getting pollutants data")
