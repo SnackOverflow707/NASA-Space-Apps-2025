@@ -243,60 +243,47 @@ def get_pollutants(bbox, bdate=None, locname="pyrsig_cache", months=1):
     return pollutants_data
 
 
-def calculate_current_pollutants(pollutants): #all pollutants are dataframes. dict --> key, df 
-
+def calculate_current_pollutants(pollutants):  # all pollutants are dict: key -> dataframe
     print("Calculating average pollutant scores.")
+    print(pollutants["no2"].head()) 
 
-    GOOD = 3
-    FAIR = 2
-    POOR = 1
-
-    avg_data = {} 
+    avg_data = {}
     results = {}
 
-    for pollutant, _data in pollutants.items(): 
-        if _data == None:  
+    # remove None entries and compute averages
+    for pollutant, _data in list(pollutants.items()):
+        if _data is None:
             del pollutants[pollutant]
-        else: 
-            avg = _data[:-10]/10 
-            avg_data[pollutant] = avg 
-    
-    MAX_SCORE = len(avg_data) * GOOD 
+        else:
+            _data = np.array(_data[-5:])  # exclude last 10 entries
+            avg = np.mean(_data)           # compute mean
+            avg_data[pollutant] = avg
 
-    #calculate ratings: 
-    for pollutant, avg in avg_data.items(): 
+    # calculate normalized ratings
+    for pollutant, avg in avg_data.items():
         if pollutant == "no2": 
-            if avg <= 5e15: 
-                results["no2"] = GOOD
-            elif avg <= 1e16: 
-                results["no2"] = FAIR 
-            else: 
-                results["no2"] = POOR
+            best, worst = 2.5e15, 1e16
         elif pollutant == "pm25": 
-            if avg <= 12: 
-                results["pm25"] = GOOD 
-            elif avg <= 35: 
-                results["pm25"] = FAIR 
-            else: 
-                results["pm25"] = POOR  
+            best, worst = 0, 35
         elif pollutant == "o3": 
-            if avg < 250: 
-                results['o3'] = POOR 
-            elif avg < 300: 
-                results['o3'] = FAIR 
-            else: 
-                results['o3'] = GOOD
+            best, worst = 350, 250
         elif pollutant == "hcho": 
-            if avg > 6e16: 
-                results["hcho"] = POOR 
-            elif avg > 2e16: 
-                results["hcho"] = FAIR 
-            else: 
-                results["hcho"] = GOOD
+            best, worst = 1e16, 6e16
+        else:
+            continue
 
-    total = sum(value for value in results.values() if isinstance(value, int)) / len(results)
+        score = (avg - best) / (worst - best)
+        score = max(0, min(score, 1))       # clamp between 0 and 1
+        results[pollutant] = int(score * 100)
 
-    return total/MAX_SCORE
+    # calculate total normalized score
+    if results:
+        total = sum(value for value in results.values() if isinstance(value, int)) / len(results)
+    else:
+        total = 0
+
+    return total
+
     
     #units: 
     #no2 = (molecules/cm2)
