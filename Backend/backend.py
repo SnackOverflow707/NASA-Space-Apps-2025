@@ -10,18 +10,12 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.dirname(current_dir)
 sys.path.insert(0, backend_dir)
-from utils.data_getters import get_openmeteo_weather, get_aqi, get_pollutants
+from utils.data_getters import get_openmeteo_weather, get_aqi, get_pollutants, calculate_current_pollutants 
 from utils.surprise_me import surprise_me 
 
 app = Flask(__name__)
 
-CORS(app, resources={
-    r"/get_data": {  # Changed to match new endpoint
-        "origins": ["http://localhost:8081"],
-        "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+CORS(app)
 
 BBOX = 0.01  # Moved to global scope
 PREVYRS = 5 
@@ -66,6 +60,38 @@ def surpriseMe():
     response = surprise_me()      
     return jsonify(response), 200
 
+@app.route("/get_pollutants", methods=["POST", "OPTIONS"])  
+def pollutant_score(): 
+    if request.method == 'OPTIONS':
+        return '', 200
+        
+    try:       
+        data = request.get_json()
+        print(f"Request data: {data}")
+        
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        # Get bounding box
+        bbox = set_bbox(latitude=latitude, longitude=longitude)
+        pollutants_data = get_pollutants(bbox)
+        pollutant_score = calculate_current_pollutants(pollutants_data)
+
+        response = pollutant_score 
+        return jsonify(response), 200
+
+    except ValueError as e:
+        # Handle validation errors
+        return jsonify({'error': str(e)}), 400
+        
+    except Exception as e:
+        print("=" * 50)
+        print(f'ERROR: Exception occurred - {str(e)}')
+        import traceback
+        traceback.print_exc()
+        print("=" * 50)
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+    
 
 @app.route("/get_data", methods=["POST", "OPTIONS"])  
 def backend_main(): 
@@ -97,19 +123,10 @@ def backend_main():
         print("Fetching weather data...")
         weather_data = get_weather_data(bbox)
         print("Weather data fetched!")
-
-        date = datetime.now().date().strftime("%Y-%m-%d")
-        print("Fetching pollutant data...")
-        pollutant_data = get_pollutants(bbox, bdate=datetime.now().date().strftime("%Y-%m-%d"), prevyrs=PREVYRS)
-        serializable_data = {}
-        for key, df in pollutant_data.items():
-            # Convert each DataFrame to a list of dicts
-            serializable_data[key] = df.to_dict(orient='records')
         
         response = {
             "aqi": aqi_data,
-            "current_weather": weather_data, 
-            "pollutants": serializable_data
+            "current_weather": weather_data
         }
         
         return jsonify(response), 200  # Only jsonify at the endpoint level
@@ -125,6 +142,8 @@ def backend_main():
         traceback.print_exc()
         print("=" * 50)
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+    
+
 
 
 if __name__ == "__main__":
